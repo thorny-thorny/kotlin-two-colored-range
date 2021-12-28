@@ -37,20 +37,35 @@ internal class IntRedBlackRangeTest {
 
   @Test
   fun testSubranges() {
-    val range = IntRedBlackRange(1..7)
-    range.setSubrangeBlack(4..4)
-    assertContentEquals(range.getBlackSubranges(), arrayListOf(4..4))
+    val range = IntRedBlackRange(1..11)
+    range.setSubrangeBlack(6..6)
+    assertContentEquals(range.getBlackSubranges(), arrayListOf(6..6))
     // Add same range - subranges should stay same
-    range.setSubrangeBlack(4..4)
-    assertContentEquals(range.getBlackSubranges(), arrayListOf(4..4))
-    // Add greater range - subranges should have union
-    range.setSubrangeBlack(4..5)
-    assertContentEquals(range.getBlackSubranges(), arrayListOf(4..5))
+    range.setSubrangeBlack(6..6)
+    assertContentEquals(range.getBlackSubranges(), arrayListOf(6..6))
+    // Add greater-right range - subranges should have union
+    range.setSubrangeBlack(6..7)
+    assertContentEquals(range.getBlackSubranges(), arrayListOf(6..7))
+    // Add greater-left range - subranges should have union
+    range.setSubrangeBlack(5..6)
+    assertContentEquals(range.getBlackSubranges(), arrayListOf(5..7))
     // Add far range on left - should be added before existing subrange
     range.setSubrangeBlack(1..1)
-    assertContentEquals(range.getBlackSubranges(), arrayListOf(1..1, 4..5))
+    assertContentEquals(range.getBlackSubranges(), arrayListOf(1..1, 5..7))
+    // Add far range on right - should be added after existing subrange
+    range.setSubrangeBlack(11..11)
+    assertContentEquals(range.getBlackSubranges(), arrayListOf(1..1, 5..7, 11..11))
+    // Add range in middle between other ranges
+    range.setSubrangeBlack(9..9)
+    assertContentEquals(range.getBlackSubranges(), arrayListOf(1..1, 5..7, 9..9, 11..11))
     // Add close range on left - should expand subrange
+    range.setSubrangeBlack(4..4)
+    assertContentEquals(range.getBlackSubranges(), arrayListOf(1..1, 4..7, 9..9, 11..11))
+    // Add close range on right - should expand subrange
+    range.setSubrangeBlack(2..2)
+    assertContentEquals(range.getBlackSubranges(), arrayListOf(1..2, 4..7, 9..9, 11..11))
+    // Add close range between ranges
     range.setSubrangeBlack(3..3)
-    assertContentEquals(range.getBlackSubranges(), arrayListOf(1..1, 3..5))
+    assertContentEquals(range.getBlackSubranges(), arrayListOf(1..7, 9..9, 11..11))
   }
 }

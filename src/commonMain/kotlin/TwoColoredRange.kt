@@ -65,11 +65,16 @@ open class TwoColoredRange<BoundType: Comparable<BoundType>, LengthType, ColorTy
     val touchingSubranges = otherColorSubranges.filter { math.rangeTouchesRange(it, subrange, step) }
 
     if (touchingSubranges.isEmpty() && !didModifyByIntersection) {
-      val index = otherColorSubranges.indexOfFirst { it.start < subrange.start }
-      otherColorSubranges.add(max(index, 0), subrange)
+      val index = otherColorSubranges.indexOfLast { it.start < subrange.start }
+      otherColorSubranges.add(index + 1, subrange)
     } else if (touchingSubranges.size == 1) {
       val touchingSubrange = touchingSubranges[0]
       otherColorSubranges[otherColorSubranges.indexOf(touchingSubrange)] = subrange.joinRange(touchingSubrange)
+    } else if (touchingSubranges.size == 2) {
+      val first = touchingSubranges[0]
+      val second = touchingSubranges[1]
+      otherColorSubranges.remove(second)
+      otherColorSubranges[otherColorSubranges.indexOf(first)] = first.joinRange(second)
     }
   }
 
