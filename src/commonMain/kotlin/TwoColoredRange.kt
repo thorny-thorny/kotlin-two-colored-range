@@ -53,6 +53,7 @@ open class TwoColoredRange<BoundType: Comparable<BoundType>, LengthType, ColorTy
 
     var didModifyByIntersection = false
     val intersectingSubranges = otherColorSubranges.filter { it.intersectsRange(subrange) }
+    val touchingSubranges = otherColorSubranges.filter { math.rangeTouchesRange(it, subrange, step) }
 
     if (intersectingSubranges.isEmpty()) {
       // NOP
@@ -60,9 +61,15 @@ open class TwoColoredRange<BoundType: Comparable<BoundType>, LengthType, ColorTy
       val intersectingSubrange = intersectingSubranges[0]
       otherColorSubranges[otherColorSubranges.indexOf(intersectingSubrange)] = subrange.joinRange(intersectingSubrange)
       didModifyByIntersection = true
+    } else {
+      val first = intersectingSubranges.first()
+      val last = intersectingSubranges.last()
+      for (index in otherColorSubranges.indexOf(last) downTo otherColorSubranges.indexOf(first) + 1) {
+        otherColorSubranges.removeAt(index)
+      }
+      otherColorSubranges[otherColorSubranges.indexOf((first))] = first.joinRange(last).joinRange(subrange)
+      didModifyByIntersection = true
     }
-
-    val touchingSubranges = otherColorSubranges.filter { math.rangeTouchesRange(it, subrange, step) }
 
     if (touchingSubranges.isEmpty() && !didModifyByIntersection) {
       val index = otherColorSubranges.indexOfLast { it.start < subrange.start }
@@ -71,8 +78,7 @@ open class TwoColoredRange<BoundType: Comparable<BoundType>, LengthType, ColorTy
       val touchingSubrange = touchingSubranges[0]
       otherColorSubranges[otherColorSubranges.indexOf(touchingSubrange)] = subrange.joinRange(touchingSubrange)
     } else if (touchingSubranges.size == 2) {
-      val first = touchingSubranges[0]
-      val second = touchingSubranges[1]
+      val (first, second) = touchingSubranges
       otherColorSubranges.remove(second)
       otherColorSubranges[otherColorSubranges.indexOf(first)] = first.joinRange(second)
     }
