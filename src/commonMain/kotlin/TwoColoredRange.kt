@@ -1,13 +1,16 @@
 package me.thorny.twoColoredRange
 
-import kotlin.math.max
-
 open class TwoColoredRange<BoundType: Comparable<BoundType>, LengthType, ColorType: Enum<ColorType>>(
+  @Suppress("MemberVisibilityCanBePrivate")
   val range: ClosedRange<BoundType>,
-  private val step: LengthType,
-  private val math: BoundMath<BoundType, LengthType>,
-  private val defaultColor: ColorType,
-  private val otherColor: ColorType,
+  @Suppress("MemberVisibilityCanBePrivate")
+  val step: LengthType,
+  @Suppress("MemberVisibilityCanBePrivate")
+  val math: BoundMath<BoundType, LengthType>,
+  @Suppress("MemberVisibilityCanBePrivate")
+  val defaultColor: ColorType,
+  @Suppress("MemberVisibilityCanBePrivate")
+  val otherColor: ColorType,
 ) {
   val length = math.subtract(math.add(range.endInclusive, step), range.start)
   private val otherColorSubranges = mutableListOf<ClosedRange<BoundType>>()
@@ -22,7 +25,7 @@ open class TwoColoredRange<BoundType: Comparable<BoundType>, LengthType, ColorTy
 //    }
   }
 
-  private fun checkSubrange(subrange: ClosedRange<BoundType>): Unit {
+  private fun checkSubrange(subrange: ClosedRange<BoundType>) {
     if (!range.containsRange(subrange)) {
       throw Exception("Subrange is out of range bounds")
     }
@@ -32,10 +35,12 @@ open class TwoColoredRange<BoundType: Comparable<BoundType>, LengthType, ColorTy
     }
   }
 
+  @Suppress("MemberVisibilityCanBePrivate")
   fun getSubrangesOfDefaultColor(): Collection<ClosedRange<BoundType>> {
     return arrayListOf(range)
   }
 
+  @Suppress("MemberVisibilityCanBePrivate")
   fun getSubrangesOfOtherColor(): Collection<ClosedRange<BoundType>> {
     return otherColorSubranges
   }
@@ -48,7 +53,8 @@ open class TwoColoredRange<BoundType: Comparable<BoundType>, LengthType, ColorTy
     }
   }
 
-  fun setSubrangeOtherColor(subrange: ClosedRange<BoundType>): Unit {
+  @Suppress("MemberVisibilityCanBePrivate")
+  fun setSubrangeOtherColor(subrange: ClosedRange<BoundType>) {
     checkSubrange(subrange)
 
     val intersectingSubranges = otherColorSubranges.filter { it.intersectsRange(subrange) }
@@ -77,7 +83,7 @@ open class TwoColoredRange<BoundType: Comparable<BoundType>, LengthType, ColorTy
           replacedSubrange = touchingSubranges.first()
         }
 
-        touchingSubranges.reversed().forEachIndexed() { index, it ->
+        touchingSubranges.reversed().forEachIndexed { index, it ->
           joinedSubrange = joinedSubrange.joinRange(it)
           if (index != touchingSubranges.lastIndex || intersectingSubranges.isNotEmpty()) {
             otherColorSubranges.remove(it)
@@ -89,7 +95,7 @@ open class TwoColoredRange<BoundType: Comparable<BoundType>, LengthType, ColorTy
     }
   }
 
-  fun setSubrangeColor(subrange: ClosedRange<BoundType>, color: ColorType): Unit {
+  fun setSubrangeColor(subrange: ClosedRange<BoundType>, color: ColorType) {
     when (color) {
       otherColor -> setSubrangeOtherColor(subrange)
     }
