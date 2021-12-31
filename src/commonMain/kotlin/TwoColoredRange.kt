@@ -51,36 +51,41 @@ open class TwoColoredRange<BoundType: Comparable<BoundType>, LengthType, ColorTy
   fun setSubrangeOtherColor(subrange: ClosedRange<BoundType>): Unit {
     checkSubrange(subrange)
 
-    var didModifyByIntersection = false
     val intersectingSubranges = otherColorSubranges.filter { it.intersectsRange(subrange) }
     val touchingSubranges = otherColorSubranges.filter { math.rangeTouchesRange(it, subrange, step) }
 
-    if (intersectingSubranges.isEmpty()) {
-      // NOP
-    } else if (intersectingSubranges.size == 1) {
-      val intersectingSubrange = intersectingSubranges[0]
-      otherColorSubranges[otherColorSubranges.indexOf(intersectingSubrange)] = subrange.joinRange(intersectingSubrange)
-      didModifyByIntersection = true
-    } else {
-      val first = intersectingSubranges.first()
-      val last = intersectingSubranges.last()
-      for (index in otherColorSubranges.indexOf(last) downTo otherColorSubranges.indexOf(first) + 1) {
-        otherColorSubranges.removeAt(index)
-      }
-      otherColorSubranges[otherColorSubranges.indexOf((first))] = first.joinRange(last).joinRange(subrange)
-      didModifyByIntersection = true
-    }
-
-    if (touchingSubranges.isEmpty() && !didModifyByIntersection) {
+    if (intersectingSubranges.isEmpty() && touchingSubranges.isEmpty()) {
       val index = otherColorSubranges.indexOfLast { it.start < subrange.start }
       otherColorSubranges.add(index + 1, subrange)
-    } else if (touchingSubranges.size == 1) {
-      val touchingSubrange = touchingSubranges[0]
-      otherColorSubranges[otherColorSubranges.indexOf(touchingSubrange)] = subrange.joinRange(touchingSubrange)
-    } else if (touchingSubranges.size == 2) {
-      val (first, second) = touchingSubranges
-      otherColorSubranges.remove(second)
-      otherColorSubranges[otherColorSubranges.indexOf(first)] = first.joinRange(second)
+    } else {
+      var joinedSubrange = subrange
+      var replacedSubrange: ClosedRange<BoundType>? = null
+
+      if (intersectingSubranges.isNotEmpty()) {
+        val first = intersectingSubranges.first()
+        val last = intersectingSubranges.last()
+        for (index in otherColorSubranges.indexOf(last) downTo otherColorSubranges.indexOf(first) + 1) {
+          otherColorSubranges.removeAt(index)
+        }
+
+        joinedSubrange = joinedSubrange.joinRange(first).joinRange(last)
+        replacedSubrange = first
+      }
+
+      if (touchingSubranges.isNotEmpty()) {
+        if (replacedSubrange == null) {
+          replacedSubrange = touchingSubranges.first()
+        }
+
+        touchingSubranges.reversed().forEachIndexed() { index, it ->
+          joinedSubrange = joinedSubrange.joinRange(it)
+          if (index != touchingSubranges.lastIndex || intersectingSubranges.isNotEmpty()) {
+            otherColorSubranges.remove(it)
+          }
+        }
+      }
+
+      otherColorSubranges[otherColorSubranges.indexOf(replacedSubrange)] = joinedSubrange
     }
   }
 

@@ -8,19 +8,19 @@ import kotlin.test.assertEquals
 
 internal class IntRedBlackRangeTest {
   @Test
-  fun testLength() {
+  fun testConstructorExceptions() {
+    assertDoesNotThrow { IntRedBlackRange(1..2) }
+    assertDoesNotThrow { IntRedBlackRange(1..1) }
+    assertThrows<Exception> { IntRedBlackRange(1..0) }
+  }
+
+  @Test
+  fun testLengths() {
     assertEquals(IntRedBlackRange(1..2).length, 2)
   }
 
   @Test
-  fun testConstructorExceptions() {
-    assertDoesNotThrow { IntRedBlackRange(1..2) }
-    assertDoesNotThrow { IntRedBlackRange(1..1) }
-    assertThrows<Exception> { IntRedBlackRange(2..1) }
-  }
-
-  @Test
-  fun testInitialSubranges() {
+  fun testBasicSubrangesGetters() {
     val range = IntRedBlackRange(1..2)
     assertContentEquals(range.getRedSubranges(), arrayListOf(1..2))
     assertContentEquals(range.getBlackSubranges(), emptyList())
@@ -31,12 +31,14 @@ internal class IntRedBlackRangeTest {
   @Test
   fun testSubrangesExceptions() {
     assertDoesNotThrow { IntRedBlackRange(1..3).setSubrangeBlack(1..3) }
+    assertThrows<Exception> { IntRedBlackRange(1..3).setSubrangeBlack(0..3) }
+    assertThrows<Exception> { IntRedBlackRange(1..3).setSubrangeBlack(1..4) }
     assertThrows<Exception> { IntRedBlackRange(1..3).setSubrangeBlack(0..4) }
     assertThrows<Exception> { IntRedBlackRange(1..3).setSubrangeBlack(3..1) }
   }
 
   @Test
-  fun testSimpleSubranges() {
+  fun testBasicSubranges() {
     val range = IntRedBlackRange(1..11)
     // Add subrange
     range.setSubrangeBlack(6..6)
@@ -54,7 +56,7 @@ internal class IntRedBlackRangeTest {
   }
 
   @Test
-  fun testBasicIntersectingSubranges() {
+  fun testSingleIntersectingSubranges() {
     val range = IntRedBlackRange(1..11)
     // Add same ranges - subranges should have one copy
     range.setSubrangeBlack(6..6)
@@ -78,7 +80,7 @@ internal class IntRedBlackRangeTest {
   }
 
   @Test
-  fun testMultipleIntersectingSubrangers() {
+  fun testMultipleIntersectingSubranges() {
     var range = IntRedBlackRange(1..11)
     range.setSubrangeBlack(2..3)
     range.setSubrangeBlack(5..6)
@@ -123,8 +125,52 @@ internal class IntRedBlackRangeTest {
     range.setSubrangeBlack(1..2)
     range.setSubrangeBlack(3..3)
     assertContentEquals(range.getBlackSubranges(), arrayListOf(1..8))
-//    // Add range close to one and intersecting other
-//    range.setSubrangeBlack(5..8)
-//    assertContentEquals(range.getBlackSubranges(), arrayListOf(1..9, 11..11))
+  }
+
+  @Test
+  fun testTouchingIntersectingSubranges() {
+    var range = IntRedBlackRange(1..11)
+    range.setSubrangeBlack(2..3)
+    range.setSubrangeBlack(5..6)
+    // Add intersecting-left touching-right range
+    range.setSubrangeBlack(3..4)
+    assertContentEquals(range.getBlackSubranges(), arrayListOf(2..6))
+
+    range = IntRedBlackRange(1..11)
+    range.setSubrangeBlack(2..3)
+    range.setSubrangeBlack(5..6)
+    // Add touching-left intersecting-right range
+    range.setSubrangeBlack(4..5)
+    assertContentEquals(range.getBlackSubranges(), arrayListOf(2..6))
+
+    range = IntRedBlackRange(1..11)
+    range.setSubrangeBlack(2..3)
+    range.setSubrangeBlack(5..6)
+    // Add containing-left touching-right range
+    range.setSubrangeBlack(1..4)
+    assertContentEquals(range.getBlackSubranges(), arrayListOf(1..6))
+
+    range = IntRedBlackRange(1..11)
+    range.setSubrangeBlack(2..3)
+    range.setSubrangeBlack(5..6)
+    // Add touching-left containing-right range
+    range.setSubrangeBlack(3..7)
+    assertContentEquals(range.getBlackSubranges(), arrayListOf(2..7))
+
+    range = IntRedBlackRange(1..11)
+    range.setSubrangeBlack(2..3)
+    range.setSubrangeBlack(5..6)
+    range.setSubrangeBlack(8..9)
+    // Add intersecting-left containing-middle touching-right range
+    range.setSubrangeBlack(3..7)
+    assertContentEquals(range.getBlackSubranges(), arrayListOf(2..9))
+
+    range = IntRedBlackRange(1..11)
+    range.setSubrangeBlack(2..3)
+    range.setSubrangeBlack(5..6)
+    range.setSubrangeBlack(8..9)
+    // Add touching-left containing-middle intersecting-right range
+    range.setSubrangeBlack(4..8)
+    assertContentEquals(range.getBlackSubranges(), arrayListOf(2..9))
   }
 }
