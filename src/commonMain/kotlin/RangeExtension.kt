@@ -8,12 +8,33 @@ fun <T: Comparable<T>> ClosedRange<T>.intersectsRange(other: ClosedRange<T>): Bo
   return this.start <= other.endInclusive && this.endInclusive >= other.start
 }
 
-fun <T: Comparable<T>> ClosedRange<T>.joinRange(other: ClosedRange<T>): ClosedRange<T> {
-  val start = minOf(this.start, other.start)
-  val endInclusive = maxOf(this.endInclusive, other.endInclusive)
+fun <T: Comparable<T>> ClosedRange<T>.makeTypedRange(start: T, endInclusive: T): ClosedRange<T> {
   @Suppress("UNCHECKED_CAST")
   return when (this) {
     is IntRange -> IntRange(start as Int, endInclusive as Int) as ClosedRange<T>
     else -> start..endInclusive
   }
+}
+
+fun <T: Comparable<T>> ClosedRange<T>.joinRange(other: ClosedRange<T>): ClosedRange<T> {
+  return makeTypedRange(minOf(this.start, other.start), maxOf(this.endInclusive, other.endInclusive))
+}
+
+fun <BoundType: Comparable<BoundType>, LengthType> ClosedRange<BoundType>.touchesRange(
+  other: ClosedRange<BoundType>,
+  step: LengthType,
+  math: BoundMath<BoundType, LengthType>,
+): Boolean {
+  return math.add(this.endInclusive, step) == other.start || math.add(other.endInclusive, step) == this.start
+}
+
+fun <BoundType: Comparable<BoundType>, LengthType> ClosedRange<BoundType>.splitByRange(
+  other: ClosedRange<BoundType>,
+  step: LengthType,
+  math: BoundMath<BoundType, LengthType>,
+): List<ClosedRange<BoundType>> {
+  return listOf(
+    makeTypedRange(this.start, math.subtract(other.start, step)),
+    makeTypedRange(math.add(other.endInclusive, step), this.endInclusive),
+  ).filter { it.start <= it.endInclusive }
 }
