@@ -7,12 +7,12 @@ import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 
 internal class IntRedBlackRangeTest {
-  fun eachColor(action: (color: RedBlackColor, otherColor: RedBlackColor) -> Unit) {
+  private fun eachColor(action: (color: RedBlackColor, otherColor: RedBlackColor) -> Unit) {
     action(RedBlackColor.BLACK, RedBlackColor.RED)
     action(RedBlackColor.RED, RedBlackColor.BLACK)
   }
 
-  fun rangeOfColor(range: IntRange, color: RedBlackColor): IntRedBlackRange {
+  private fun rangeOfColor(range: IntRange, color: RedBlackColor): IntRedBlackRange {
     val redBlackRange = IntRedBlackRange(range)
     redBlackRange.setSubrangeColor(range, color)
     return redBlackRange
@@ -151,64 +151,77 @@ internal class IntRedBlackRangeTest {
 
   @Test
   fun testTouchingSubranges() {
-    val range = IntRedBlackRange(1..11)
-    range.setSubrangeBlack(6..6)
-    // Add close range on left - should expand subrange
-    range.setSubrangeBlack(4..5)
-    assertContentEquals(range.getBlackSubranges(), listOf(4..6))
-    // Add close range on right - should expand subrange
-    range.setSubrangeBlack(7..8)
-    assertContentEquals(range.getBlackSubranges(), listOf(4..8))
-    // Add close range between ranges
-    range.setSubrangeBlack(1..2)
-    range.setSubrangeBlack(3..3)
-    assertContentEquals(range.getBlackSubranges(), listOf(1..8))
+    eachColor { color, otherColor ->
+      val range = rangeOfColor(1..11, otherColor)
+      range.setSubrangeColor(6..6, color)
+      // Add close range on left - should expand subrange
+      range.setSubrangeColor(4..5, color)
+      assertContentEquals(range.getSubrangesOfColor(color), listOf(4..6))
+      assertContentEquals(range.getSubrangesOfColor(otherColor), listOf(1..3, 7..11))
+      // Add close range on right - should expand subrange
+      range.setSubrangeColor(7..8, color)
+      assertContentEquals(range.getSubrangesOfColor(color), listOf(4..8))
+      assertContentEquals(range.getSubrangesOfColor(otherColor), listOf(1..3, 9..11))
+      // Add close range between ranges
+      range.setSubrangeColor(1..2, color)
+      range.setSubrangeColor(3..3, color)
+      assertContentEquals(range.getSubrangesOfColor(color), listOf(1..8))
+      assertContentEquals(range.getSubrangesOfColor(otherColor), listOf(9..11))
+    }
   }
 
   @Test
   fun testTouchingIntersectingSubranges() {
-    var range = IntRedBlackRange(1..11)
-    range.setSubrangeBlack(2..3)
-    range.setSubrangeBlack(5..6)
-    // Add intersecting-left touching-right range
-    range.setSubrangeBlack(3..4)
-    assertContentEquals(range.getBlackSubranges(), listOf(2..6))
+    eachColor { color, otherColor ->
+      var range = rangeOfColor(1..11, otherColor)
+      range.setSubrangeColor(2..3, color)
+      range.setSubrangeColor(5..6, color)
+      // Add intersecting-left touching-right range
+      range.setSubrangeColor(3..4, color)
+      assertContentEquals(range.getSubrangesOfColor(color), listOf(2..6))
+      assertContentEquals(range.getSubrangesOfColor(otherColor), listOf(1..1, 7..11))
 
-    range = IntRedBlackRange(1..11)
-    range.setSubrangeBlack(2..3)
-    range.setSubrangeBlack(5..6)
-    // Add touching-left intersecting-right range
-    range.setSubrangeBlack(4..5)
-    assertContentEquals(range.getBlackSubranges(), listOf(2..6))
+      range = rangeOfColor(1..11, otherColor)
+      range.setSubrangeColor(2..3, color)
+      range.setSubrangeColor(5..6, color)
+      // Add touching-left intersecting-right range
+      range.setSubrangeColor(4..5, color)
+      assertContentEquals(range.getSubrangesOfColor(color), listOf(2..6))
+      assertContentEquals(range.getSubrangesOfColor(otherColor), listOf(1..1, 7..11))
 
-    range = IntRedBlackRange(1..11)
-    range.setSubrangeBlack(2..3)
-    range.setSubrangeBlack(5..6)
-    // Add containing-left touching-right range
-    range.setSubrangeBlack(1..4)
-    assertContentEquals(range.getBlackSubranges(), listOf(1..6))
+      range = rangeOfColor(1..11, otherColor)
+      range.setSubrangeColor(2..3, color)
+      range.setSubrangeColor(5..6, color)
+      // Add containing-left touching-right range
+      range.setSubrangeColor(1..4, color)
+      assertContentEquals(range.getSubrangesOfColor(color), listOf(1..6))
+      assertContentEquals(range.getSubrangesOfColor(otherColor), listOf(7..11))
 
-    range = IntRedBlackRange(1..11)
-    range.setSubrangeBlack(2..3)
-    range.setSubrangeBlack(5..6)
-    // Add touching-left containing-right range
-    range.setSubrangeBlack(3..7)
-    assertContentEquals(range.getBlackSubranges(), listOf(2..7))
+      range = rangeOfColor(1..11, otherColor)
+      range.setSubrangeColor(2..3, color)
+      range.setSubrangeColor(5..6, color)
+      // Add touching-left containing-right range
+      range.setSubrangeColor(3..7, color)
+      assertContentEquals(range.getSubrangesOfColor(color), listOf(2..7))
+      assertContentEquals(range.getSubrangesOfColor(otherColor), listOf(1..1, 8..11))
 
-    range = IntRedBlackRange(1..11)
-    range.setSubrangeBlack(2..3)
-    range.setSubrangeBlack(5..6)
-    range.setSubrangeBlack(8..9)
-    // Add intersecting-left containing-middle touching-right range
-    range.setSubrangeBlack(3..7)
-    assertContentEquals(range.getBlackSubranges(), listOf(2..9))
+      range = rangeOfColor(1..11, otherColor)
+      range.setSubrangeColor(2..3, color)
+      range.setSubrangeColor(5..6, color)
+      range.setSubrangeColor(8..9, color)
+      // Add intersecting-left containing-middle touching-right range
+      range.setSubrangeColor(3..7, color)
+      assertContentEquals(range.getSubrangesOfColor(color), listOf(2..9))
+      assertContentEquals(range.getSubrangesOfColor(otherColor), listOf(1..1, 10..11))
 
-    range = IntRedBlackRange(1..11)
-    range.setSubrangeBlack(2..3)
-    range.setSubrangeBlack(5..6)
-    range.setSubrangeBlack(8..9)
-    // Add touching-left containing-middle intersecting-right range
-    range.setSubrangeBlack(4..8)
-    assertContentEquals(range.getBlackSubranges(), listOf(2..9))
+      range = rangeOfColor(1..11, otherColor)
+      range.setSubrangeColor(2..3, color)
+      range.setSubrangeColor(5..6, color)
+      range.setSubrangeColor(8..9, color)
+      // Add touching-left containing-middle intersecting-right range
+      range.setSubrangeColor(4..8, color)
+      assertContentEquals(range.getSubrangesOfColor(color), listOf(2..9))
+      assertContentEquals(range.getSubrangesOfColor(otherColor), listOf(1..1, 10..11))
+    }
   }
 }
