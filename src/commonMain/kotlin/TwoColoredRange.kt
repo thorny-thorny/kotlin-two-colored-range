@@ -1,19 +1,14 @@
 package me.thorny.twoColoredRange
 
 open class TwoColoredRange<BoundType: Comparable<BoundType>, LengthType, ColorType: Enum<ColorType>>(
-  @Suppress("MemberVisibilityCanBePrivate")
   val range: ClosedRange<BoundType>,
-  @Suppress("MemberVisibilityCanBePrivate")
   val step: LengthType,
-  @Suppress("MemberVisibilityCanBePrivate")
   val math: BoundMath<BoundType, LengthType>,
-  @Suppress("MemberVisibilityCanBePrivate")
   val defaultColor: ColorType,
-  @Suppress("MemberVisibilityCanBePrivate")
   val otherColor: ColorType,
 ) {
   val length = math.getLength(math.add(range.endInclusive, step), range.start)
-  private val otherColorSubranges = mutableListOf<ClosedRange<BoundType>>()
+  private val defaultColorSubranges = mutableListOf(range)
 
   init {
     if (range.start > range.endInclusive) {
@@ -37,9 +32,14 @@ open class TwoColoredRange<BoundType: Comparable<BoundType>, LengthType, ColorTy
 
   @Suppress("MemberVisibilityCanBePrivate")
   fun getSubrangesOfDefaultColor(): List<ClosedRange<BoundType>> {
-    val subranges = ArrayDeque<ClosedRange<BoundType>>(otherColorSubranges.size + 1)
+    return defaultColorSubranges
+  }
+
+  @Suppress("MemberVisibilityCanBePrivate")
+  fun getSubrangesOfOtherColor(): List<ClosedRange<BoundType>> {
+    val subranges = ArrayDeque<ClosedRange<BoundType>>(defaultColorSubranges.size + 1)
     subranges.add(range)
-    otherColorSubranges.forEach {
+    defaultColorSubranges.forEach {
       val subrange = subranges.removeLast()
       val splits = subrange.splitByRange(it, step, math)
       splits.forEach { split ->
@@ -50,12 +50,7 @@ open class TwoColoredRange<BoundType: Comparable<BoundType>, LengthType, ColorTy
     return subranges.toList()
   }
 
-  @Suppress("MemberVisibilityCanBePrivate")
-  fun getSubrangesOfOtherColor(): List<ClosedRange<BoundType>> {
-    return otherColorSubranges
-  }
-
-  fun getSubrangesOfColor(color: ColorType): Collection<ClosedRange<BoundType>> {
+  fun getSubrangesOfColor(color: ColorType): List<ClosedRange<BoundType>> {
     return when (color) {
       defaultColor -> getSubrangesOfDefaultColor()
       otherColor -> getSubrangesOfOtherColor()
@@ -63,37 +58,35 @@ open class TwoColoredRange<BoundType: Comparable<BoundType>, LengthType, ColorTy
     }
   }
 
-  @Suppress("MemberVisibilityCanBePrivate")
-  fun setSubrangeDefaultColor(subrange: ClosedRange<BoundType>) {
+  fun setSubrangeOtherColor(subrange: ClosedRange<BoundType>) {
     checkSubrange(subrange)
 
-    val intersectingSubranges = otherColorSubranges.filter { it.intersectsRange(subrange) }
+    val intersectingSubranges = defaultColorSubranges.filter { it.intersectsRange(subrange) }
     intersectingSubranges.forEach {
       if (subrange.containsRange(it)) {
-        otherColorSubranges.remove(it)
+        defaultColorSubranges.remove(it)
       } else {
         val split = it.splitByRange(subrange, step, math)
-        val itIndex = otherColorSubranges.indexOf(it)
-        otherColorSubranges[itIndex] = split.first()
+        val itIndex = defaultColorSubranges.indexOf(it)
+        defaultColorSubranges[itIndex] = split.first()
 
         val second = split.getOrNull(1)
         if (second != null) {
-          otherColorSubranges.add(itIndex + 1, second)
+          defaultColorSubranges.add(itIndex + 1, second)
         }
       }
     }
   }
 
-  @Suppress("MemberVisibilityCanBePrivate")
-  fun setSubrangeOtherColor(subrange: ClosedRange<BoundType>) {
+  fun setSubrangeDefaultColor(subrange: ClosedRange<BoundType>) {
     checkSubrange(subrange)
 
-    val intersectingSubranges = otherColorSubranges.filter { it.intersectsRange(subrange) }
-    val touchingSubranges = otherColorSubranges.filter { it.touchesRange(subrange, step, math) }
+    val intersectingSubranges = defaultColorSubranges.filter { it.intersectsRange(subrange) }
+    val touchingSubranges = defaultColorSubranges.filter { it.touchesRange(subrange, step, math) }
 
     if (intersectingSubranges.isEmpty() && touchingSubranges.isEmpty()) {
-      val index = otherColorSubranges.indexOfLast { it.start < subrange.start }
-      otherColorSubranges.add(index + 1, subrange)
+      val index = defaultColorSubranges.indexOfLast { it.start < subrange.start }
+      defaultColorSubranges.add(index + 1, subrange)
     } else {
       var joinedSubrange = subrange
       var replacedSubrange: ClosedRange<BoundType>? = null
@@ -101,8 +94,8 @@ open class TwoColoredRange<BoundType: Comparable<BoundType>, LengthType, ColorTy
       if (intersectingSubranges.isNotEmpty()) {
         val first = intersectingSubranges.first()
         val last = intersectingSubranges.last()
-        for (index in otherColorSubranges.indexOf(last) downTo otherColorSubranges.indexOf(first) + 1) {
-          otherColorSubranges.removeAt(index)
+        for (index in defaultColorSubranges.indexOf(last) downTo defaultColorSubranges.indexOf(first) + 1) {
+          defaultColorSubranges.removeAt(index)
         }
 
         joinedSubrange = joinedSubrange.joinRange(first).joinRange(last)
@@ -117,12 +110,12 @@ open class TwoColoredRange<BoundType: Comparable<BoundType>, LengthType, ColorTy
         touchingSubranges.reversed().forEachIndexed { index, it ->
           joinedSubrange = joinedSubrange.joinRange(it)
           if (index != touchingSubranges.lastIndex || intersectingSubranges.isNotEmpty()) {
-            otherColorSubranges.remove(it)
+            defaultColorSubranges.remove(it)
           }
         }
       }
 
-      otherColorSubranges[otherColorSubranges.indexOf(replacedSubrange)] = joinedSubrange
+      defaultColorSubranges[defaultColorSubranges.indexOf(replacedSubrange)] = joinedSubrange
     }
   }
 

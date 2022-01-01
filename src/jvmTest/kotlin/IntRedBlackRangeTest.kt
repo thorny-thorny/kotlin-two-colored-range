@@ -1,3 +1,4 @@
+import me.thorny.twoColoredRange.IntBoundMath
 import me.thorny.twoColoredRange.IntRedBlackRange
 import me.thorny.twoColoredRange.RedBlackColor
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -8,8 +9,8 @@ import kotlin.test.assertEquals
 
 internal class IntRedBlackRangeTest {
   private fun eachColor(action: (color: RedBlackColor, otherColor: RedBlackColor) -> Unit) {
-    action(RedBlackColor.BLACK, RedBlackColor.RED)
     action(RedBlackColor.RED, RedBlackColor.BLACK)
+    action(RedBlackColor.BLACK, RedBlackColor.RED)
   }
 
   private fun rangeOfColor(range: IntRange, color: RedBlackColor): IntRedBlackRange {
@@ -26,8 +27,14 @@ internal class IntRedBlackRangeTest {
   }
 
   @Test
-  fun testLengths() {
-    assertEquals(IntRedBlackRange(1..2).length, 2)
+  fun testBasicProperties() {
+    val range = IntRedBlackRange(1..2)
+    assertEquals(range.range, 1..2)
+    assertEquals(range.step, 1)
+    assertEquals(range.math, IntBoundMath)
+    assertEquals(range.defaultColor, RedBlackColor.RED)
+    assertEquals(range.otherColor, RedBlackColor.BLACK)
+    assertEquals(range.length, 2)
   }
 
   @Test
@@ -35,13 +42,23 @@ internal class IntRedBlackRangeTest {
     val range = IntRedBlackRange(1..2)
     assertContentEquals(range.getRedSubranges(), listOf(1..2))
     assertContentEquals(range.getBlackSubranges(), emptyList())
-    assertContentEquals(range.getSubrangesOfColor(RedBlackColor.RED), listOf(1..2))
-    assertContentEquals(range.getSubrangesOfColor(RedBlackColor.BLACK), emptyList())
     range.setSubrangeBlack(1..2)
     assertContentEquals(range.getRedSubranges(), emptyList())
     assertContentEquals(range.getBlackSubranges(), listOf(1..2))
+  }
+
+  @Test
+  fun testSuperclassGetters() {
+    val range = IntRedBlackRange(1..2)
+    assertContentEquals(range.getSubrangesOfColor(RedBlackColor.RED), listOf(1..2))
+    assertContentEquals(range.getSubrangesOfColor(RedBlackColor.BLACK), emptyList())
+    assertContentEquals(range.getSubrangesOfDefaultColor(), listOf(1..2))
+    assertContentEquals(range.getSubrangesOfOtherColor(), emptyList())
+    range.setSubrangeBlack(1..2)
     assertContentEquals(range.getSubrangesOfColor(RedBlackColor.RED), emptyList())
     assertContentEquals(range.getSubrangesOfColor(RedBlackColor.BLACK), listOf(1..2))
+    assertContentEquals(range.getSubrangesOfDefaultColor(), emptyList())
+    assertContentEquals(range.getSubrangesOfOtherColor(), listOf(1..2))
   }
 
   @Test
