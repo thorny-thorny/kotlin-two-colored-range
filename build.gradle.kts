@@ -1,9 +1,10 @@
 plugins {
     kotlin("multiplatform") version "1.5.10"
+    id("maven-publish")
 }
 
 group = "me.thorny"
-version = "0.1"
+version = "0.9.0"
 
 repositories {
     mavenCentral()
@@ -16,7 +17,6 @@ kotlin {
         }
         withJava()
         testRuns["test"].executionTask.configure {
-            useJUnitPlatform()
             testLogging {
                 events(
                     org.gradle.api.tasks.testing.logging.TestLogEvent.PASSED,
