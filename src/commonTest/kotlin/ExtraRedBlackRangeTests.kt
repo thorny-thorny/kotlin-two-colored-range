@@ -3,16 +3,17 @@ import me.thorny.twoColoredRange.RedBlackIntRange
 import me.thorny.twoColoredRange.RedBlackLongRange
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
+import kotlin.test.assertTrue
 
 class ExtraRedBlackRangeTests {
   @Test
   fun testDefaultColors() {
     var range = RedBlackIntRange(1..1)
-    assert(range.defaultColor == RedBlackColor.RED && range.otherColor == RedBlackColor.BLACK)
+    assertTrue(range.defaultColor == RedBlackColor.RED && range.otherColor == RedBlackColor.BLACK)
     range = RedBlackIntRange(1..1, RedBlackColor.RED)
-    assert(range.defaultColor == RedBlackColor.RED && range.otherColor == RedBlackColor.BLACK)
+    assertTrue(range.defaultColor == RedBlackColor.RED && range.otherColor == RedBlackColor.BLACK)
     range = RedBlackIntRange(1..1, RedBlackColor.BLACK)
-    assert(range.defaultColor == RedBlackColor.BLACK && range.otherColor == RedBlackColor.RED)
+    assertTrue(range.defaultColor == RedBlackColor.BLACK && range.otherColor == RedBlackColor.RED)
   }
 
   @Test

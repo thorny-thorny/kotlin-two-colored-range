@@ -1,11 +1,7 @@
 import me.thorny.twoColoredRange.IntBoundMath
 import me.thorny.twoColoredRange.RedBlackIntRange
 import me.thorny.twoColoredRange.RedBlackColor
-import org.junit.jupiter.api.assertDoesNotThrow
-import org.junit.jupiter.api.assertThrows
-import kotlin.test.Test
-import kotlin.test.assertContentEquals
-import kotlin.test.assertEquals
+import kotlin.test.*
 
 internal class RedBlackIntRangeTests {
   private fun eachColor(action: (color: RedBlackColor, otherColor: RedBlackColor) -> Unit) {
@@ -21,9 +17,9 @@ internal class RedBlackIntRangeTests {
 
   @Test
   fun testConstructorExceptions() {
-    assertDoesNotThrow { RedBlackIntRange(1..2) }
-    assertDoesNotThrow { RedBlackIntRange(1..1) }
-    assertThrows<Exception> { RedBlackIntRange(1..0) }
+    expect<Unit>(Unit) { RedBlackIntRange(1..6) }
+    expect<Unit>(Unit) { RedBlackIntRange(1..1) }
+    assertFailsWith<Exception> { RedBlackIntRange(IntRange(1, 0)) }
   }
 
   @Test
@@ -65,11 +61,11 @@ internal class RedBlackIntRangeTests {
   @Test
   fun testSubrangesExceptions() {
     eachColor { color, _ ->
-      assertDoesNotThrow { RedBlackIntRange(1..3).setSubrangeColor(1..3, color) }
-      assertThrows<Exception> { RedBlackIntRange(1..3).setSubrangeColor(0..3, color) }
-      assertThrows<Exception> { RedBlackIntRange(1..3).setSubrangeColor(1..4, color) }
-      assertThrows<Exception> { RedBlackIntRange(1..3).setSubrangeColor(0..4, color) }
-      assertThrows<Exception> { RedBlackIntRange(1..3).setSubrangeColor(3..1, color) }
+      expect(Unit) { RedBlackIntRange(1..3).setSubrangeColor(1..3, color) }
+      assertFailsWith<Exception> { RedBlackIntRange(1..3).setSubrangeColor(0..3, color) }
+      assertFailsWith<Exception> { RedBlackIntRange(1..3).setSubrangeColor(1..4, color) }
+      assertFailsWith<Exception> { RedBlackIntRange(1..3).setSubrangeColor(0..4, color) }
+      assertFailsWith<Exception> { RedBlackIntRange(1..3).setSubrangeColor(IntRange(3, 1), color) }
     }
   }
 

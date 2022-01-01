@@ -1,7 +1,7 @@
 import me.thorny.twoColoredRange.*
-import org.junit.jupiter.api.assertThrows
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
+import kotlin.test.assertFailsWith
 
 enum class RedBlackYellowColor {
   RED,
@@ -39,6 +39,10 @@ class WeirdBound(val value: Int): Comparable<WeirdBound> {
 
     return false
   }
+
+  override fun hashCode(): Int {
+    return value
+  }
 }
 
 object WeirdMath: BoundMath<WeirdBound, Int> {
@@ -55,12 +59,12 @@ class ExtraTwoColoredRangeTests {
   @Test
   fun testExtraExceptions() {
     val range = rangeWithMath(IntBoundMath)
-    assertThrows<Exception> { range.getSubrangesOfColor(RedBlackYellowColor.YELLOW) }
-    assertThrows<Exception> { range.setSubrangeColor(1..2, RedBlackYellowColor.YELLOW) }
-    assertThrows<Exception> { rangeWithMath(BrokenIntBoundMath1) }
-    assertThrows<Exception> { rangeWithMath(BrokenIntBoundMath2) }
-    assertThrows<Exception> { rangeWithMath(BrokenIntBoundMath3) }
-    assertThrows<Exception> {
+    assertFailsWith<Exception> { range.getSubrangesOfColor(RedBlackYellowColor.YELLOW) }
+    assertFailsWith<Exception> { range.setSubrangeColor(1..2, RedBlackYellowColor.YELLOW) }
+    assertFailsWith<Exception> { rangeWithMath(BrokenIntBoundMath1) }
+    assertFailsWith<Exception> { rangeWithMath(BrokenIntBoundMath2) }
+    assertFailsWith<Exception> { rangeWithMath(BrokenIntBoundMath3) }
+    assertFailsWith<Exception> {
       TwoColoredRange(1..2, 1, IntBoundMath, RedBlackYellowColor.RED, RedBlackYellowColor.RED)
     }
   }

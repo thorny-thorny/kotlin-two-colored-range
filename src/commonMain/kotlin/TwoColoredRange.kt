@@ -19,7 +19,7 @@ open class TwoColoredRange<BoundType: Comparable<BoundType>, LengthType, ColorTy
       throw Exception("Default color $defaultColor can't be equal to other color $otherColor")
     }
 
-    // Better than nothing amiright?
+    // Better than nothing am I right?
     if (
       math.add(range.start, step) <= range.start ||
       math.subtract(range.endInclusive, step) >= range.endInclusive ||
