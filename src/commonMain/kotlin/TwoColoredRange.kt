@@ -12,21 +12,30 @@ open class TwoColoredRange<BoundType: Comparable<BoundType>, LengthType, ColorTy
 
   init {
     if (range.start > range.endInclusive) {
-      throw Exception("Range start can't be greater than end")
+      throw Exception("Invalid range $range")
     }
 
-//    if (fullRange.start == math.add(fullRange.start, increment)) {
-//      throw Exception("Bad increment")
-//    }
+    if (defaultColor == otherColor) {
+      throw Exception("Default color $defaultColor can't be equal to other color $otherColor")
+    }
+
+    // Better than nothing amiright?
+    if (
+      math.add(range.start, step) <= range.start ||
+      math.subtract(range.endInclusive, step) >= range.endInclusive ||
+      math.getLength(math.add(range.start, step), range.start) != step
+    ) {
+      throw Exception("Invalid math $math")
+    }
   }
 
   private fun checkSubrange(subrange: ClosedRange<BoundType>) {
     if (!range.containsRange(subrange)) {
-      throw Exception("Subrange is out of range bounds")
+      throw Exception("Subrange $subrange is out of range bounds $range")
     }
 
     if (subrange.start > subrange.endInclusive) {
-      throw Exception("Subrange start can't be greater than end")
+      throw Exception("Invalid subrange $range")
     }
   }
 
@@ -54,7 +63,7 @@ open class TwoColoredRange<BoundType: Comparable<BoundType>, LengthType, ColorTy
     return when (color) {
       defaultColor -> getSubrangesOfDefaultColor()
       otherColor -> getSubrangesOfOtherColor()
-      else -> emptyList()
+      else -> throw Exception("Invalid color $color")
     }
   }
 
@@ -123,6 +132,19 @@ open class TwoColoredRange<BoundType: Comparable<BoundType>, LengthType, ColorTy
     when (color) {
       defaultColor -> setSubrangeDefaultColor(subrange)
       otherColor -> setSubrangeOtherColor(subrange)
+      else -> throw Exception("Invalid color $color")
     }
   }
 }
+
+open class TwoColoredIntRange<ColorType: Enum<ColorType>>(
+  range: ClosedRange<Int>,
+  defaultColor: ColorType,
+  otherColor: ColorType,
+): TwoColoredRange<Int, Int, ColorType>(range, 1, IntBoundMath, defaultColor, otherColor)
+
+open class TwoColoredLongRange<ColorType: Enum<ColorType>>(
+  range: ClosedRange<Long>,
+  defaultColor: ColorType,
+  otherColor: ColorType,
+): TwoColoredRange<Long, Long, ColorType>(range, 1, LongBoundMath, defaultColor, otherColor)

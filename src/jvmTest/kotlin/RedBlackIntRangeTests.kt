@@ -1,5 +1,5 @@
 import me.thorny.twoColoredRange.IntBoundMath
-import me.thorny.twoColoredRange.IntRedBlackRange
+import me.thorny.twoColoredRange.RedBlackIntRange
 import me.thorny.twoColoredRange.RedBlackColor
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
@@ -7,28 +7,28 @@ import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 
-internal class IntRedBlackRangeTest {
+internal class RedBlackIntRangeTests {
   private fun eachColor(action: (color: RedBlackColor, otherColor: RedBlackColor) -> Unit) {
     action(RedBlackColor.RED, RedBlackColor.BLACK)
     action(RedBlackColor.BLACK, RedBlackColor.RED)
   }
 
-  private fun rangeOfColor(range: IntRange, color: RedBlackColor): IntRedBlackRange {
-    val redBlackRange = IntRedBlackRange(range)
+  private fun rangeOfColor(range: IntRange, color: RedBlackColor): RedBlackIntRange {
+    val redBlackRange = RedBlackIntRange(range)
     redBlackRange.setSubrangeColor(range, color)
     return redBlackRange
   }
 
   @Test
   fun testConstructorExceptions() {
-    assertDoesNotThrow { IntRedBlackRange(1..2) }
-    assertDoesNotThrow { IntRedBlackRange(1..1) }
-    assertThrows<Exception> { IntRedBlackRange(1..0) }
+    assertDoesNotThrow { RedBlackIntRange(1..2) }
+    assertDoesNotThrow { RedBlackIntRange(1..1) }
+    assertThrows<Exception> { RedBlackIntRange(1..0) }
   }
 
   @Test
   fun testBasicProperties() {
-    val range = IntRedBlackRange(1..2)
+    val range = RedBlackIntRange(1..2)
     assertEquals(range.range, 1..2)
     assertEquals(range.step, 1)
     assertEquals(range.math, IntBoundMath)
@@ -39,7 +39,7 @@ internal class IntRedBlackRangeTest {
 
   @Test
   fun testBasicSubrangesGetters() {
-    val range = IntRedBlackRange(1..2)
+    val range = RedBlackIntRange(1..2)
     assertContentEquals(range.getRedSubranges(), listOf(1..2))
     assertContentEquals(range.getBlackSubranges(), emptyList())
     range.setSubrangeBlack(1..2)
@@ -48,13 +48,14 @@ internal class IntRedBlackRangeTest {
   }
 
   @Test
-  fun testSuperclassGetters() {
-    val range = IntRedBlackRange(1..2)
+  fun testSuperclassGettersSetters() {
+    val range = RedBlackIntRange(1..2)
+    range.setSubrangeDefaultColor(1..2)
     assertContentEquals(range.getSubrangesOfColor(RedBlackColor.RED), listOf(1..2))
     assertContentEquals(range.getSubrangesOfColor(RedBlackColor.BLACK), emptyList())
     assertContentEquals(range.getSubrangesOfDefaultColor(), listOf(1..2))
     assertContentEquals(range.getSubrangesOfOtherColor(), emptyList())
-    range.setSubrangeBlack(1..2)
+    range.setSubrangeOtherColor(1..2)
     assertContentEquals(range.getSubrangesOfColor(RedBlackColor.RED), emptyList())
     assertContentEquals(range.getSubrangesOfColor(RedBlackColor.BLACK), listOf(1..2))
     assertContentEquals(range.getSubrangesOfDefaultColor(), emptyList())
@@ -64,11 +65,11 @@ internal class IntRedBlackRangeTest {
   @Test
   fun testSubrangesExceptions() {
     eachColor { color, _ ->
-      assertDoesNotThrow { IntRedBlackRange(1..3).setSubrangeColor(1..3, color) }
-      assertThrows<Exception> { IntRedBlackRange(1..3).setSubrangeColor(0..3, color) }
-      assertThrows<Exception> { IntRedBlackRange(1..3).setSubrangeColor(1..4, color) }
-      assertThrows<Exception> { IntRedBlackRange(1..3).setSubrangeColor(0..4, color) }
-      assertThrows<Exception> { IntRedBlackRange(1..3).setSubrangeColor(3..1, color) }
+      assertDoesNotThrow { RedBlackIntRange(1..3).setSubrangeColor(1..3, color) }
+      assertThrows<Exception> { RedBlackIntRange(1..3).setSubrangeColor(0..3, color) }
+      assertThrows<Exception> { RedBlackIntRange(1..3).setSubrangeColor(1..4, color) }
+      assertThrows<Exception> { RedBlackIntRange(1..3).setSubrangeColor(0..4, color) }
+      assertThrows<Exception> { RedBlackIntRange(1..3).setSubrangeColor(3..1, color) }
     }
   }
 

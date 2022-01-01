@@ -12,6 +12,7 @@ fun <T: Comparable<T>> ClosedRange<T>.makeTypedRange(start: T, endInclusive: T):
   @Suppress("UNCHECKED_CAST")
   return when (this) {
     is IntRange -> IntRange(start as Int, endInclusive as Int) as ClosedRange<T>
+    is LongRange -> LongRange(start as Long, endInclusive as Long) as ClosedRange<T>
     else -> start..endInclusive
   }
 }
