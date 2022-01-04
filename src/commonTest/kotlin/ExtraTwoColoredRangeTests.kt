@@ -73,13 +73,13 @@ class ExtraTwoColoredRangeTests {
   fun testDerivatives() {
     val intRange = TwoColoredIntRange(1..2, RedBlackYellowColor.RED, RedBlackYellowColor.BLACK)
     intRange.setSubrangeOtherColor(2..2)
-    assertContentEquals(intRange.getSubrangesOfDefaultColor(), listOf(1..1))
-    assertContentEquals(intRange.getSubrangesOfOtherColor(), listOf(2..2))
+    assertContentEquals(listOf(1..1), intRange.getSubrangesOfDefaultColor())
+    assertContentEquals(listOf(2..2), intRange.getSubrangesOfOtherColor())
 
     val longRange = TwoColoredLongRange(1L..2L, RedBlackYellowColor.RED, RedBlackYellowColor.BLACK)
     longRange.setSubrangeOtherColor(2L..2L)
-    assertContentEquals(longRange.getSubrangesOfDefaultColor(), listOf(1L..1L))
-    assertContentEquals(longRange.getSubrangesOfOtherColor(), listOf(2L..2L))
+    assertContentEquals(listOf(1L..1L), longRange.getSubrangesOfDefaultColor())
+    assertContentEquals(listOf(2L..2L), longRange.getSubrangesOfOtherColor(), )
   }
 
   @Test
@@ -95,6 +95,6 @@ class ExtraTwoColoredRangeTests {
     // Just to cover non-standard ranges related code
     range.setSubrangeOtherColor(WeirdBound(1)..WeirdBound(1))
     range.setSubrangeOtherColor(WeirdBound(2)..WeirdBound(2))
-    assertContentEquals(range.getSubrangesOfOtherColor(), listOf(WeirdBound(1)..WeirdBound(2)))
+    assertContentEquals(listOf(WeirdBound(1)..WeirdBound(2)), range.getSubrangesOfOtherColor())
   }
 }
