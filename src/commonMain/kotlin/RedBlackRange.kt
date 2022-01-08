@@ -5,7 +5,7 @@ enum class RedBlackColor {
   BLACK,
 }
 
-open class RedBlackRange<BoundType: Comparable<BoundType>, LengthType>(
+open class RedBlackRange<BoundType: Comparable<BoundType>, LengthType: Comparable<LengthType>>(
   range: ClosedRange<BoundType>,
   step: LengthType,
   math: BoundMath<BoundType, LengthType>,

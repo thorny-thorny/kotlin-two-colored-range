@@ -21,7 +21,7 @@ fun <T: Comparable<T>> ClosedRange<T>.joinRange(other: ClosedRange<T>): ClosedRa
   return makeTypedRange(minOf(this.start, other.start), maxOf(this.endInclusive, other.endInclusive))
 }
 
-fun <BoundType: Comparable<BoundType>, LengthType> ClosedRange<BoundType>.touchesRange(
+fun <BoundType: Comparable<BoundType>, LengthType: Comparable<LengthType>> ClosedRange<BoundType>.touchesRange(
   other: ClosedRange<BoundType>,
   step: LengthType,
   math: BoundMath<BoundType, LengthType>,
@@ -29,7 +29,7 @@ fun <BoundType: Comparable<BoundType>, LengthType> ClosedRange<BoundType>.touche
   return math.add(this.endInclusive, step) == other.start || math.add(other.endInclusive, step) == this.start
 }
 
-fun <BoundType: Comparable<BoundType>, LengthType> ClosedRange<BoundType>.splitByRange(
+fun <BoundType: Comparable<BoundType>, LengthType: Comparable<LengthType>> ClosedRange<BoundType>.splitByRange(
   other: ClosedRange<BoundType>,
   step: LengthType,
   math: BoundMath<BoundType, LengthType>,

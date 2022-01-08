@@ -1,6 +1,6 @@
 package me.thorny.twoColoredRange
 
-interface BoundMath<BoundType: Comparable<BoundType>, LengthType> {
+interface BoundMath<BoundType: Comparable<BoundType>, LengthType: Comparable<LengthType>> {
   fun add(bound: BoundType, length: LengthType): BoundType
   fun subtract(bound: BoundType, length: LengthType): BoundType
   fun getLength(greater: BoundType, lesser: BoundType): LengthType
