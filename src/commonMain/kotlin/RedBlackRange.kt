@@ -21,7 +21,13 @@ open class RedBlackRange<BoundType: Comparable<BoundType>, LengthType: Comparabl
 
   fun getBlackSubranges() = getSubrangesOfColor(RedBlackColor.BLACK)
 
+  fun setSubrangeRed(subrange: ClosedRange<BoundType>) = setSubrangeColor(subrange, RedBlackColor.RED)
+
   fun setSubrangeBlack(subrange: ClosedRange<BoundType>) = setSubrangeColor(subrange, RedBlackColor.BLACK)
+
+  fun getRedSubrange(maxLength: LengthType = step, segmentRange: ClosedRange<BoundType> = range) = getSubrangeOfColor(RedBlackColor.RED, maxLength, segmentRange)
+
+  fun getBlackSubrange(maxLength: LengthType = step, segmentRange: ClosedRange<BoundType> = range) = getSubrangeOfColor(RedBlackColor.BLACK, maxLength, segmentRange)
 }
 
 open class RedBlackIntRange(

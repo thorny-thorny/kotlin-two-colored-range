@@ -26,4 +26,13 @@ class ExtraRedBlackRangeTests {
     assertContentEquals(listOf(1L..1L), range.getRedSubranges())
     assertContentEquals(listOf(2L..2L), range.getBlackSubranges())
   }
+
+  @Test
+  fun testExtraMethods() {
+    val range = RedBlackIntRange(1..5)
+    range.setSubrangeBlack(1..5)
+    assertEquals(1..1, range.getBlackSubrange())
+    range.setSubrangeRed(1..5)
+    assertEquals(1..1, range.getRedSubrange())
+  }
 }

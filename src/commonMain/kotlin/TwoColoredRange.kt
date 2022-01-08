@@ -1,14 +1,14 @@
 package me.thorny.twoColoredRange
 
-open class TwoColoredRange<BoundType: Comparable<BoundType>, LengthType, ColorType: Enum<ColorType>>(
+open class TwoColoredRange<BoundType: Comparable<BoundType>, LengthType: Comparable<LengthType>, ColorType: Enum<ColorType>>(
   val range: ClosedRange<BoundType>,
   val step: LengthType,
   val math: BoundMath<BoundType, LengthType>,
   val defaultColor: ColorType,
   val otherColor: ColorType,
-) {
-  val length = math.getLength(math.add(range.endInclusive, step), range.start)
-  private val defaultColorSubranges = mutableListOf(range)
+): Iterable<Pair<ClosedRange<BoundType>, ColorType>> {
+  val length = math.getLength(range.start, math.add(range.endInclusive, step))
+  internal val defaultColorSubranges = mutableListOf(range)
 
   init {
     if (range.start > range.endInclusive) {
@@ -23,13 +23,13 @@ open class TwoColoredRange<BoundType: Comparable<BoundType>, LengthType, ColorTy
     if (
       math.add(range.start, step) <= range.start ||
       math.subtract(range.endInclusive, step) >= range.endInclusive ||
-      math.getLength(math.add(range.start, step), range.start) != step
+      math.getLength(range.start, math.add(range.start, step)) != step
     ) {
       throw Exception("Invalid math $math")
     }
   }
 
-  private fun checkSubrange(subrange: ClosedRange<BoundType>) {
+  internal fun checkSubrange(subrange: ClosedRange<BoundType>) {
     if (!range.containsRange(subrange)) {
       throw Exception("Subrange $subrange is out of range bounds $range")
     }
@@ -39,24 +39,14 @@ open class TwoColoredRange<BoundType: Comparable<BoundType>, LengthType, ColorTy
     }
   }
 
-  @Suppress("MemberVisibilityCanBePrivate")
   fun getSubrangesOfDefaultColor(): List<ClosedRange<BoundType>> {
     return defaultColorSubranges
   }
 
-  @Suppress("MemberVisibilityCanBePrivate")
   fun getSubrangesOfOtherColor(): List<ClosedRange<BoundType>> {
-    val subranges = ArrayDeque<ClosedRange<BoundType>>(defaultColorSubranges.size + 1)
-    subranges.add(range)
-    defaultColorSubranges.forEach {
-      val subrange = subranges.removeLast()
-      val splits = subrange.splitByRange(it, step, math)
-      splits.forEach { split ->
-        subranges.addLast(split)
-      }
-    }
-
-    return subranges.toList()
+    return this
+      .filter { (_, color) -> color == this.otherColor }
+      .map { it.first }
   }
 
   fun getSubrangesOfColor(color: ColorType): List<ClosedRange<BoundType>> {
@@ -134,6 +124,102 @@ open class TwoColoredRange<BoundType: Comparable<BoundType>, LengthType, ColorTy
       otherColor -> setSubrangeOtherColor(subrange)
       else -> throw Exception("Invalid color $color")
     }
+  }
+
+  fun getColor(bound: BoundType): ColorType {
+    if (bound < range.start || bound > range.endInclusive) {
+      throw Exception("Bound $bound is out of range bounds $range")
+    }
+
+    return when (defaultColorSubranges.find { it.start <= bound && it.endInclusive >= bound }) {
+      null -> otherColor
+      else -> defaultColor
+    }
+  }
+
+  fun getSubrangeOfColor(color: ColorType, maxLength: LengthType = step, segmentRange: ClosedRange<BoundType> = range): ClosedRange<BoundType>? {
+    if (maxLength < step) {
+      throw Exception("Max length $maxLength can't be lesser than step $step")
+    }
+
+    if (color != defaultColor && color != otherColor) {
+      throw Exception("Invalid color $color")
+    }
+
+    val fullLengthPair = this.subrangesIterator(segmentRange).asSequence().find { (subrange, subrangeColor) ->
+      math.getLength(subrange.start, math.add(subrange.endInclusive, step)) >= maxLength && subrangeColor == color
+    }
+
+    if (fullLengthPair != null) {
+      val (subrange) = fullLengthPair
+      return subrange.makeTypedRange(subrange.start, math.subtract(math.add(subrange.start, maxLength), step))
+    }
+
+    val firstMatchingPair = this.subrangesIterator(segmentRange).asSequence().find { (_, subrangeColor) -> subrangeColor == color }
+    return firstMatchingPair?.first
+  }
+
+  override fun iterator(): Iterator<Pair<ClosedRange<BoundType>, ColorType>> {
+    return TwoColoredRangeIterator(this)
+  }
+
+  fun subrangesIterator(segmentRange: ClosedRange<BoundType> = range): Iterator<Pair<ClosedRange<BoundType>, ColorType>> {
+    return TwoColoredRangeIterator(this, segmentRange)
+  }
+}
+
+open class TwoColoredRangeIterator<BoundType: Comparable<BoundType>, LengthType: Comparable<LengthType>, ColorType: Enum<ColorType>>(
+  private val parent: TwoColoredRange<BoundType, LengthType, ColorType>,
+  private val segmentRange: ClosedRange<BoundType> = parent.range,
+): Iterator<Pair<ClosedRange<BoundType>, ColorType>> {
+  private var start = segmentRange.start
+  private var color = parent.getColor(start)
+  private var defaultColorSubrangeIndex = parent.defaultColorSubranges.indexOfFirst {
+    when (color) {
+      parent.defaultColor -> it.start <= start && it.endInclusive >= start
+      else -> it.start >= start
+    }
+  }
+
+  init {
+    parent.checkSubrange(segmentRange)
+  }
+
+  override fun hasNext(): Boolean {
+    return start <= segmentRange.endInclusive
+  }
+
+  override fun next(): Pair<ClosedRange<BoundType>, ColorType> {
+    var defaultColorSubrange = parent.defaultColorSubranges.getOrNull(defaultColorSubrangeIndex)
+    if (defaultColorSubrange != null) {
+      if (defaultColorSubrange.start < segmentRange.start) {
+        defaultColorSubrange = defaultColorSubrange.makeTypedRange(maxOf(defaultColorSubrange.start, segmentRange.start), defaultColorSubrange.endInclusive)
+      }
+      if (defaultColorSubrange.endInclusive > segmentRange.endInclusive) {
+        defaultColorSubrange = defaultColorSubrange.makeTypedRange(
+          defaultColorSubrange.start,
+          minOf(defaultColorSubrange.endInclusive, segmentRange.endInclusive)
+        )
+      }
+    }
+
+    val pair: Pair<ClosedRange<BoundType>, ColorType>
+
+    if (color == parent.defaultColor) {
+      pair = defaultColorSubrange!! to color
+      color = parent.otherColor
+      defaultColorSubrangeIndex += 1
+    } else {
+      val endInclusive = when (defaultColorSubrange) {
+        null -> segmentRange.endInclusive
+        else -> minOf(parent.math.subtract(defaultColorSubrange.start, parent.step), segmentRange.endInclusive)
+      }
+      pair = parent.range.makeTypedRange(start, endInclusive) to color
+      color = parent.defaultColor
+    }
+    start = parent.math.add(pair.first.endInclusive, parent.step)
+
+    return pair
   }
 }
 

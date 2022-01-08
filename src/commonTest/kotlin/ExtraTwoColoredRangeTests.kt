@@ -12,19 +12,19 @@ enum class RedBlackYellowColor {
 object BrokenIntBoundMath1: BoundMath<Int, Int> {
   override fun add(bound: Int, length: Int) = bound
   override fun subtract(bound: Int, length: Int) = IntBoundMath.subtract(bound, length)
-  override fun getLength(greater: Int, lesser: Int) = IntBoundMath.getLength(greater, lesser)
+  override fun getLength(start: Int, endExclusive: Int) = IntBoundMath.getLength(start, endExclusive)
 }
 
 object BrokenIntBoundMath2: BoundMath<Int, Int> {
   override fun add(bound: Int, length: Int) = IntBoundMath.add(bound, length)
   override fun subtract(bound: Int, length: Int) = bound
-  override fun getLength(greater: Int, lesser: Int) = IntBoundMath.getLength(greater, lesser)
+  override fun getLength(start: Int, endExclusive: Int) = IntBoundMath.getLength(start, endExclusive)
 }
 
 object BrokenIntBoundMath3: BoundMath<Int, Int> {
   override fun add(bound: Int, length: Int) = IntBoundMath.add(bound, length)
   override fun subtract(bound: Int, length: Int) = IntBoundMath.subtract(bound, length)
-  override fun getLength(greater: Int, lesser: Int) = 0
+  override fun getLength(start: Int, endExclusive: Int) = 0
 }
 
 class WeirdBound(val value: Int): Comparable<WeirdBound> {
@@ -48,7 +48,7 @@ class WeirdBound(val value: Int): Comparable<WeirdBound> {
 object WeirdMath: BoundMath<WeirdBound, Int> {
   override fun add(bound: WeirdBound, length: Int) = WeirdBound(bound.value + length)
   override fun subtract(bound: WeirdBound, length: Int) = WeirdBound(bound.value - length)
-  override fun getLength(greater: WeirdBound, lesser: WeirdBound) = greater.value - lesser.value
+  override fun getLength(start: WeirdBound, endExclusive: WeirdBound) = endExclusive.value - start.value
 }
 
 class ExtraTwoColoredRangeTests {
@@ -61,6 +61,7 @@ class ExtraTwoColoredRangeTests {
     val range = rangeWithMath(IntBoundMath)
     assertFailsWith<Exception> { range.getSubrangesOfColor(RedBlackYellowColor.YELLOW) }
     assertFailsWith<Exception> { range.setSubrangeColor(1..2, RedBlackYellowColor.YELLOW) }
+    assertFailsWith<Exception> { range.getSubrangeOfColor(RedBlackYellowColor.YELLOW) }
     assertFailsWith<Exception> { rangeWithMath(BrokenIntBoundMath1) }
     assertFailsWith<Exception> { rangeWithMath(BrokenIntBoundMath2) }
     assertFailsWith<Exception> { rangeWithMath(BrokenIntBoundMath3) }
