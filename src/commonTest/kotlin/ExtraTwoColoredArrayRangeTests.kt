@@ -1,4 +1,6 @@
 import me.thorny.twoColoredRange.*
+import me.thorny.twoColoredRange.math.BoundMath
+import me.thorny.twoColoredRange.math.IntBoundMath
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertFailsWith
@@ -51,9 +53,9 @@ object WeirdMath: BoundMath<WeirdBound, Int> {
   override fun getLength(start: WeirdBound, endExclusive: WeirdBound) = endExclusive.value - start.value
 }
 
-class ExtraTwoColoredLinkedRangeTests {
-  private fun rangeWithMath(math: BoundMath<Int, Int>): TwoColoredLinkedRange<Int, Int, RedBlackYellowColor> {
-    return TwoColoredLinkedRange(1..2, 1, math, RedBlackYellowColor.RED, RedBlackYellowColor.BLACK)
+class ExtraTwoColoredArrayRangeTests {
+  private fun rangeWithMath(math: BoundMath<Int, Int>): TwoColoredArrayRange<Int, Int, RedBlackYellowColor> {
+    return TwoColoredArrayRange(1..2, 1, math, RedBlackYellowColor.RED, RedBlackYellowColor.BLACK)
   }
 
   @Test
@@ -66,18 +68,18 @@ class ExtraTwoColoredLinkedRangeTests {
     assertFailsWith<Exception> { rangeWithMath(BrokenIntBoundMath2) }
     assertFailsWith<Exception> { rangeWithMath(BrokenIntBoundMath3) }
     assertFailsWith<Exception> {
-      TwoColoredLinkedRange(1..2, 1, IntBoundMath, RedBlackYellowColor.RED, RedBlackYellowColor.RED)
+      TwoColoredArrayRange(1..2, 1, IntBoundMath, RedBlackYellowColor.RED, RedBlackYellowColor.RED)
     }
   }
 
   @Test
   fun testDerivatives() {
-    val intRange = TwoColoredIntLinkedRange(1..2, RedBlackYellowColor.RED, RedBlackYellowColor.BLACK)
+    val intRange = TwoColoredIntArrayRange(1..2, RedBlackYellowColor.RED, RedBlackYellowColor.BLACK)
     intRange.setSubrangeOtherColor(2..2)
     assertContentEquals(listOf(1..1), intRange.getSubrangesOfDefaultColor())
     assertContentEquals(listOf(2..2), intRange.getSubrangesOfOtherColor())
 
-    val longRange = TwoColoredLongLinkedRange(1L..2L, RedBlackYellowColor.RED, RedBlackYellowColor.BLACK)
+    val longRange = TwoColoredLongArrayRange(1L..2L, RedBlackYellowColor.RED, RedBlackYellowColor.BLACK)
     longRange.setSubrangeOtherColor(2L..2L)
     assertContentEquals(listOf(1L..1L), longRange.getSubrangesOfDefaultColor())
     assertContentEquals(listOf(2L..2L), longRange.getSubrangesOfOtherColor())
@@ -85,7 +87,7 @@ class ExtraTwoColoredLinkedRangeTests {
 
   @Test
   fun testWeirdMath() {
-    val range = TwoColoredLinkedRange(
+    val range = TwoColoredArrayRange(
       WeirdBound(1)..WeirdBound(2),
       1,
       WeirdMath,

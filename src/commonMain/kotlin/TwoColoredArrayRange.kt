@@ -1,6 +1,14 @@
 package me.thorny.twoColoredRange
 
-open class TwoColoredLinkedRange<
+import me.thorny.twoColoredRange.math.BoundMath
+import me.thorny.twoColoredRange.math.IntBoundMath
+import me.thorny.twoColoredRange.math.LongBoundMath
+import me.thorny.twoColoredRange.rangeUtils.*
+
+/**
+ * [TwoColoredRange] implementation using [ArrayList].
+ */
+open class TwoColoredArrayRange<
     BoundType: Comparable<BoundType>,
     LengthType: Comparable<LengthType>,
     ColorType: Enum<ColorType>,
@@ -13,7 +21,7 @@ open class TwoColoredLinkedRange<
   final override val rangeFactory: RangeFactory<BoundType> = ClosedRangeFactory(),
 ): TwoColoredRange<BoundType, LengthType, ColorType> {
   override val length = math.getLength(range.start, math.add(range.endInclusive, step))
-  internal val defaultColorSubranges = mutableListOf(range)
+  internal val defaultColorSubranges = ArrayList(listOf(range))
 
   init {
     if (range.isEmpty()) {
@@ -145,7 +153,7 @@ open class TwoColoredLinkedRange<
   override fun getSubrangeOfColor(
     color: ColorType,
     maxLength: LengthType,
-    segmentRange: ClosedRange<BoundType>,
+    limitByRange: ClosedRange<BoundType>,
   ): ClosedRange<BoundType>? {
     if (maxLength < step) {
       throw Exception("Max length $maxLength can't be lesser than step $step")
@@ -155,7 +163,7 @@ open class TwoColoredLinkedRange<
       throw Exception("Invalid color $color")
     }
 
-    val fullLengthPair = this.subrangesIterator(segmentRange).asSequence().find { (subrange, subrangeColor) ->
+    val fullLengthPair = this.subrangesIterator(limitByRange).asSequence().find { (subrange, subrangeColor) ->
       math.getLength(subrange.start, math.add(subrange.endInclusive, step)) >= maxLength && subrangeColor == color
     }
 
@@ -164,30 +172,33 @@ open class TwoColoredLinkedRange<
       return rangeFactory.getRange(subrange.start, math.subtract(math.add(subrange.start, maxLength), step))
     }
 
-    val firstMatchingPair = this.subrangesIterator(segmentRange).asSequence().find { (_, subrangeColor) ->
+    val firstMatchingPair = this.subrangesIterator(limitByRange).asSequence().find { (_, subrangeColor) ->
       subrangeColor == color
     }
     return firstMatchingPair?.first
   }
 
   override fun iterator(): Iterator<Pair<ClosedRange<BoundType>, ColorType>> {
-    return TwoColoredLinkedRangeIterator(this)
+    return TwoColoredArrayRangeIterator(this)
   }
 
-  override fun subrangesIterator(segmentRange: ClosedRange<BoundType>): Iterator<Pair<ClosedRange<BoundType>, ColorType>> {
-    return TwoColoredLinkedRangeIterator(this, segmentRange)
+  override fun subrangesIterator(limitByRange: ClosedRange<BoundType>): Iterator<Pair<ClosedRange<BoundType>, ColorType>> {
+    return TwoColoredArrayRangeIterator(this, limitByRange)
   }
 }
 
-open class TwoColoredLinkedRangeIterator<
+/**
+ * [TwoColoredArrayRange] iterator.
+ */
+open class TwoColoredArrayRangeIterator<
     BoundType: Comparable<BoundType>,
     LengthType: Comparable<LengthType>,
     ColorType: Enum<ColorType>,
 >(
-  private val parent: TwoColoredLinkedRange<BoundType, LengthType, ColorType>,
-  private val segmentRange: ClosedRange<BoundType> = parent.range,
+  private val parent: TwoColoredArrayRange<BoundType, LengthType, ColorType>,
+  private val limitByRange: ClosedRange<BoundType> = parent.range,
 ): Iterator<Pair<ClosedRange<BoundType>, ColorType>> {
-  private var start = segmentRange.start
+  private var start = limitByRange.start
   private var color = parent.getColor(start)
   private var defaultColorSubrangeIndex = parent.defaultColorSubranges.indexOfFirst {
     when (color) {
@@ -197,26 +208,26 @@ open class TwoColoredLinkedRangeIterator<
   }
 
   init {
-    parent.checkSubrange(segmentRange)
+    parent.checkSubrange(limitByRange)
   }
 
   override fun hasNext(): Boolean {
-    return start <= segmentRange.endInclusive
+    return start <= limitByRange.endInclusive
   }
 
   override fun next(): Pair<ClosedRange<BoundType>, ColorType> {
     var defaultColorSubrange = parent.defaultColorSubranges.getOrNull(defaultColorSubrangeIndex)
     if (defaultColorSubrange != null) {
-      if (defaultColorSubrange.start < segmentRange.start) {
+      if (defaultColorSubrange.start < limitByRange.start) {
         defaultColorSubrange = parent.rangeFactory.getRange(
-          maxOf(defaultColorSubrange.start, segmentRange.start),
+          maxOf(defaultColorSubrange.start, limitByRange.start),
           defaultColorSubrange.endInclusive,
         )
       }
-      if (defaultColorSubrange.endInclusive > segmentRange.endInclusive) {
+      if (defaultColorSubrange.endInclusive > limitByRange.endInclusive) {
         defaultColorSubrange = parent.rangeFactory.getRange(
           defaultColorSubrange.start,
-          minOf(defaultColorSubrange.endInclusive, segmentRange.endInclusive)
+          minOf(defaultColorSubrange.endInclusive, limitByRange.endInclusive)
         )
       }
     }
@@ -229,8 +240,8 @@ open class TwoColoredLinkedRangeIterator<
       defaultColorSubrangeIndex += 1
     } else {
       val endInclusive = when (defaultColorSubrange) {
-        null -> segmentRange.endInclusive
-        else -> minOf(parent.math.subtract(defaultColorSubrange.start, parent.step), segmentRange.endInclusive)
+        null -> limitByRange.endInclusive
+        else -> minOf(parent.math.subtract(defaultColorSubrange.start, parent.step), limitByRange.endInclusive)
       }
       pair = parent.rangeFactory.getRange(start, endInclusive) to color
       color = parent.defaultColor
@@ -241,14 +252,20 @@ open class TwoColoredLinkedRangeIterator<
   }
 }
 
-open class TwoColoredIntLinkedRange<ColorType: Enum<ColorType>>(
+/**
+ * [TwoColoredArrayRange] for [IntRange].
+ */
+open class TwoColoredIntArrayRange<ColorType: Enum<ColorType>>(
   range: ClosedRange<Int>,
   defaultColor: ColorType,
   otherColor: ColorType,
-): TwoColoredLinkedRange<Int, Int, ColorType>(range, 1, IntBoundMath, defaultColor, otherColor, IntRangeFactory)
+): TwoColoredArrayRange<Int, Int, ColorType>(range, 1, IntBoundMath, defaultColor, otherColor, IntRangeFactory)
 
-open class TwoColoredLongLinkedRange<ColorType: Enum<ColorType>>(
+/**
+ * [TwoColoredArrayRange] for [LongRange].
+ */
+open class TwoColoredLongArrayRange<ColorType: Enum<ColorType>>(
   range: ClosedRange<Long>,
   defaultColor: ColorType,
   otherColor: ColorType,
-): TwoColoredLinkedRange<Long, Long, ColorType>(range, 1, LongBoundMath, defaultColor, otherColor, LongRangeFactory)
+): TwoColoredArrayRange<Long, Long, ColorType>(range, 1, LongBoundMath, defaultColor, otherColor, LongRangeFactory)
