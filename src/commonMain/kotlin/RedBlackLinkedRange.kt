@@ -5,12 +5,12 @@ enum class RedBlackColor {
   BLACK,
 }
 
-open class RedBlackRange<BoundType: Comparable<BoundType>, LengthType: Comparable<LengthType>>(
+open class RedBlackLinkedRange<BoundType: Comparable<BoundType>, LengthType: Comparable<LengthType>>(
   range: ClosedRange<BoundType>,
   step: LengthType,
   math: BoundMath<BoundType, LengthType>,
   defaultColor: RedBlackColor? = RedBlackColor.RED,
-): TwoColoredRange<BoundType, LengthType, RedBlackColor>(
+): TwoColoredLinkedRange<BoundType, LengthType, RedBlackColor>(
   range,
   step,
   math,
@@ -30,20 +30,20 @@ open class RedBlackRange<BoundType: Comparable<BoundType>, LengthType: Comparabl
   fun getBlackSubrange(maxLength: LengthType = step, segmentRange: ClosedRange<BoundType> = range) = getSubrangeOfColor(RedBlackColor.BLACK, maxLength, segmentRange)
 }
 
-open class RedBlackIntRange(
+open class RedBlackIntLinkedRange(
   range: ClosedRange<Int>,
   defaultColor: RedBlackColor? = RedBlackColor.RED,
-): RedBlackRange<Int, Int>(
+): RedBlackLinkedRange<Int, Int>(
   range,
   1,
   IntBoundMath,
   defaultColor,
 )
 
-open class RedBlackLongRange(
+open class RedBlackLongLinkedRange(
   range: ClosedRange<Long>,
   defaultColor: RedBlackColor? = RedBlackColor.RED,
-): RedBlackRange<Long, Long>(
+): RedBlackLinkedRange<Long, Long>(
   range,
   1,
   LongBoundMath,

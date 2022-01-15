@@ -1,30 +1,30 @@
 import me.thorny.twoColoredRange.IntBoundMath
-import me.thorny.twoColoredRange.RedBlackIntRange
+import me.thorny.twoColoredRange.RedBlackIntLinkedRange
 import me.thorny.twoColoredRange.RedBlackColor
 import kotlin.test.*
 
-internal class RedBlackIntRangeTests {
+internal class RedBlackIntLinkedRangeTests {
   private fun eachColor(action: (color: RedBlackColor, otherColor: RedBlackColor) -> Unit) {
     action(RedBlackColor.RED, RedBlackColor.BLACK)
     action(RedBlackColor.BLACK, RedBlackColor.RED)
   }
 
-  private fun rangeOfColor(range: IntRange, color: RedBlackColor): RedBlackIntRange {
-    val redBlackRange = RedBlackIntRange(range)
+  private fun rangeOfColor(range: IntRange, color: RedBlackColor): RedBlackIntLinkedRange {
+    val redBlackRange = RedBlackIntLinkedRange(range)
     redBlackRange.setSubrangeColor(range, color)
     return redBlackRange
   }
 
   @Test
   fun testConstructorExceptions() {
-    expect<Unit>(Unit) { RedBlackIntRange(1..6) }
-    expect<Unit>(Unit) { RedBlackIntRange(1..1) }
-    assertFailsWith<Exception> { RedBlackIntRange(IntRange(1, 0)) }
+    expect<Unit>(Unit) { RedBlackIntLinkedRange(1..6) }
+    expect<Unit>(Unit) { RedBlackIntLinkedRange(1..1) }
+    assertFailsWith<Exception> { RedBlackIntLinkedRange(IntRange(1, 0)) }
   }
 
   @Test
   fun testBasicProperties() {
-    val range = RedBlackIntRange(1..2)
+    val range = RedBlackIntLinkedRange(1..2)
     assertEquals(1..2, range.range)
     assertEquals(1, range.step)
     assertEquals(IntBoundMath, range.math)
@@ -35,7 +35,7 @@ internal class RedBlackIntRangeTests {
 
   @Test
   fun testBasicGetters() {
-    val range = RedBlackIntRange(1..2)
+    val range = RedBlackIntLinkedRange(1..2)
     assertContentEquals(listOf(1..2), range.getRedSubranges())
     assertContentEquals(emptyList(), range.getBlackSubranges())
     range.setSubrangeBlack(1..2)
@@ -45,7 +45,7 @@ internal class RedBlackIntRangeTests {
 
   @Test
   fun testSuperclassGettersSetters() {
-    val range = RedBlackIntRange(1..2)
+    val range = RedBlackIntLinkedRange(1..2)
 
     range.setSubrangeDefaultColor(1..2)
     assertContentEquals(listOf(1..2), range.getSubrangesOfColor(RedBlackColor.RED))
@@ -70,11 +70,11 @@ internal class RedBlackIntRangeTests {
   @Test
   fun testSubrangesExceptions() {
     eachColor { color, _ ->
-      expect(Unit) { RedBlackIntRange(1..3).setSubrangeColor(1..3, color) }
-      assertFailsWith<Exception> { RedBlackIntRange(1..3).setSubrangeColor(0..3, color) }
-      assertFailsWith<Exception> { RedBlackIntRange(1..3).setSubrangeColor(1..4, color) }
-      assertFailsWith<Exception> { RedBlackIntRange(1..3).setSubrangeColor(0..4, color) }
-      assertFailsWith<Exception> { RedBlackIntRange(1..3).setSubrangeColor(IntRange(3, 1), color) }
+      expect(Unit) { RedBlackIntLinkedRange(1..3).setSubrangeColor(1..3, color) }
+      assertFailsWith<Exception> { RedBlackIntLinkedRange(1..3).setSubrangeColor(0..3, color) }
+      assertFailsWith<Exception> { RedBlackIntLinkedRange(1..3).setSubrangeColor(1..4, color) }
+      assertFailsWith<Exception> { RedBlackIntLinkedRange(1..3).setSubrangeColor(0..4, color) }
+      assertFailsWith<Exception> { RedBlackIntLinkedRange(1..3).setSubrangeColor(IntRange(3, 1), color) }
     }
   }
 
@@ -315,13 +315,13 @@ internal class RedBlackIntRangeTests {
 
   @Test
   fun testSubrangeRequestsExceptions() {
-    expect<Unit>(Unit) { RedBlackIntRange(1..2).subrangesIterator(IntRange(2, 2)) }
-    expect<Unit>(Unit) { RedBlackIntRange(1..2).getSubrangeOfColor(RedBlackColor.RED, segmentRange = IntRange(2, 2)) }
-    assertFailsWith<Exception> { RedBlackIntRange(1..2).subrangesIterator(IntRange(2, 1)) }
-    assertFailsWith<Exception> { RedBlackIntRange(1..2).getSubrangeOfColor(RedBlackColor.RED, segmentRange = IntRange(2, 1)) }
-    assertFailsWith<Exception> { RedBlackIntRange(1..2).subrangesIterator(0..3) }
-    assertFailsWith<Exception> { RedBlackIntRange(1..2).getSubrangeOfColor(RedBlackColor.RED, segmentRange = IntRange(0, 3)) }
-    assertFailsWith<Exception> { RedBlackIntRange(1..2).getSubrangeOfColor(RedBlackColor.RED, 0) }
-    assertFailsWith<Exception> { RedBlackIntRange(1..2).getSubrangeOfColor(RedBlackColor.RED, -1) }
+    expect<Unit>(Unit) { RedBlackIntLinkedRange(1..2).subrangesIterator(IntRange(2, 2)) }
+    expect<Unit>(Unit) { RedBlackIntLinkedRange(1..2).getSubrangeOfColor(RedBlackColor.RED, segmentRange = IntRange(2, 2)) }
+    assertFailsWith<Exception> { RedBlackIntLinkedRange(1..2).subrangesIterator(IntRange(2, 1)) }
+    assertFailsWith<Exception> { RedBlackIntLinkedRange(1..2).getSubrangeOfColor(RedBlackColor.RED, segmentRange = IntRange(2, 1)) }
+    assertFailsWith<Exception> { RedBlackIntLinkedRange(1..2).subrangesIterator(0..3) }
+    assertFailsWith<Exception> { RedBlackIntLinkedRange(1..2).getSubrangeOfColor(RedBlackColor.RED, segmentRange = IntRange(0, 3)) }
+    assertFailsWith<Exception> { RedBlackIntLinkedRange(1..2).getSubrangeOfColor(RedBlackColor.RED, 0) }
+    assertFailsWith<Exception> { RedBlackIntLinkedRange(1..2).getSubrangeOfColor(RedBlackColor.RED, -1) }
   }
 }

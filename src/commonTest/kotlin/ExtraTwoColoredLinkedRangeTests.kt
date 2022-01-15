@@ -51,9 +51,9 @@ object WeirdMath: BoundMath<WeirdBound, Int> {
   override fun getLength(start: WeirdBound, endExclusive: WeirdBound) = endExclusive.value - start.value
 }
 
-class ExtraTwoColoredRangeTests {
-  private fun rangeWithMath(math: BoundMath<Int, Int>): TwoColoredRange<Int, Int, RedBlackYellowColor> {
-    return TwoColoredRange(1..2, 1, math, RedBlackYellowColor.RED, RedBlackYellowColor.BLACK)
+class ExtraTwoColoredLinkedRangeTests {
+  private fun rangeWithMath(math: BoundMath<Int, Int>): TwoColoredLinkedRange<Int, Int, RedBlackYellowColor> {
+    return TwoColoredLinkedRange(1..2, 1, math, RedBlackYellowColor.RED, RedBlackYellowColor.BLACK)
   }
 
   @Test
@@ -66,18 +66,18 @@ class ExtraTwoColoredRangeTests {
     assertFailsWith<Exception> { rangeWithMath(BrokenIntBoundMath2) }
     assertFailsWith<Exception> { rangeWithMath(BrokenIntBoundMath3) }
     assertFailsWith<Exception> {
-      TwoColoredRange(1..2, 1, IntBoundMath, RedBlackYellowColor.RED, RedBlackYellowColor.RED)
+      TwoColoredLinkedRange(1..2, 1, IntBoundMath, RedBlackYellowColor.RED, RedBlackYellowColor.RED)
     }
   }
 
   @Test
   fun testDerivatives() {
-    val intRange = TwoColoredIntRange(1..2, RedBlackYellowColor.RED, RedBlackYellowColor.BLACK)
+    val intRange = TwoColoredIntLinkedRange(1..2, RedBlackYellowColor.RED, RedBlackYellowColor.BLACK)
     intRange.setSubrangeOtherColor(2..2)
     assertContentEquals(listOf(1..1), intRange.getSubrangesOfDefaultColor())
     assertContentEquals(listOf(2..2), intRange.getSubrangesOfOtherColor())
 
-    val longRange = TwoColoredLongRange(1L..2L, RedBlackYellowColor.RED, RedBlackYellowColor.BLACK)
+    val longRange = TwoColoredLongLinkedRange(1L..2L, RedBlackYellowColor.RED, RedBlackYellowColor.BLACK)
     longRange.setSubrangeOtherColor(2L..2L)
     assertContentEquals(listOf(1L..1L), longRange.getSubrangesOfDefaultColor())
     assertContentEquals(listOf(2L..2L), longRange.getSubrangesOfOtherColor(), )
@@ -85,7 +85,7 @@ class ExtraTwoColoredRangeTests {
 
   @Test
   fun testWeirdMath() {
-    val range = TwoColoredRange(
+    val range = TwoColoredLinkedRange(
       WeirdBound(1)..WeirdBound(2),
       1,
       WeirdMath,
