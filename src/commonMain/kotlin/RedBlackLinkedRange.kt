@@ -10,12 +10,14 @@ open class RedBlackLinkedRange<BoundType: Comparable<BoundType>, LengthType: Com
   step: LengthType,
   math: BoundMath<BoundType, LengthType>,
   defaultColor: RedBlackColor? = RedBlackColor.RED,
+  rangeFactory: RangeFactory<BoundType> = ClosedRangeFactory(),
 ): TwoColoredLinkedRange<BoundType, LengthType, RedBlackColor>(
   range,
   step,
   math,
   defaultColor ?: RedBlackColor.RED,
   if (defaultColor == RedBlackColor.BLACK) RedBlackColor.RED else RedBlackColor.BLACK,
+  rangeFactory,
 ) {
   fun getRedSubranges() = getSubrangesOfColor(RedBlackColor.RED)
 
@@ -25,9 +27,11 @@ open class RedBlackLinkedRange<BoundType: Comparable<BoundType>, LengthType: Com
 
   fun setSubrangeBlack(subrange: ClosedRange<BoundType>) = setSubrangeColor(subrange, RedBlackColor.BLACK)
 
-  fun getRedSubrange(maxLength: LengthType = step, segmentRange: ClosedRange<BoundType> = range) = getSubrangeOfColor(RedBlackColor.RED, maxLength, segmentRange)
+  fun getRedSubrange(maxLength: LengthType = step, segmentRange: ClosedRange<BoundType> = range) =
+    getSubrangeOfColor(RedBlackColor.RED, maxLength, segmentRange)
 
-  fun getBlackSubrange(maxLength: LengthType = step, segmentRange: ClosedRange<BoundType> = range) = getSubrangeOfColor(RedBlackColor.BLACK, maxLength, segmentRange)
+  fun getBlackSubrange(maxLength: LengthType = step, segmentRange: ClosedRange<BoundType> = range) =
+    getSubrangeOfColor(RedBlackColor.BLACK, maxLength, segmentRange)
 }
 
 open class RedBlackIntLinkedRange(
@@ -38,6 +42,7 @@ open class RedBlackIntLinkedRange(
   1,
   IntBoundMath,
   defaultColor,
+  IntRangeFactory,
 )
 
 open class RedBlackLongLinkedRange(
@@ -48,4 +53,5 @@ open class RedBlackLongLinkedRange(
   1,
   LongBoundMath,
   defaultColor,
+  LongRangeFactory,
 )

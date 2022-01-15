@@ -1,18 +1,23 @@
 package me.thorny.twoColoredRange
 
-open class TwoColoredLinkedRange<BoundType: Comparable<BoundType>, LengthType: Comparable<LengthType>, ColorType: Enum<ColorType>>(
+open class TwoColoredLinkedRange<
+    BoundType: Comparable<BoundType>,
+    LengthType: Comparable<LengthType>,
+    ColorType: Enum<ColorType>,
+>(
   override val range: ClosedRange<BoundType>,
   override val step: LengthType,
   override val math: BoundMath<BoundType, LengthType>,
   override val defaultColor: ColorType,
   override val otherColor: ColorType,
+  override val rangeFactory: RangeFactory<BoundType> = ClosedRangeFactory(),
 ): TwoColoredRange<BoundType, LengthType, ColorType> {
   override val length = math.getLength(range.start, math.add(range.endInclusive, step))
   internal val defaultColorSubranges = mutableListOf(range)
 
   init {
-    if (range.start > range.endInclusive) {
-      throw Exception("Invalid range $range")
+    if (range.isEmpty()) {
+      throw Exception("Empty range $range")
     }
 
     if (defaultColor == otherColor) {
@@ -34,8 +39,8 @@ open class TwoColoredLinkedRange<BoundType: Comparable<BoundType>, LengthType: C
       throw Exception("Subrange $subrange is out of range bounds $range")
     }
 
-    if (subrange.start > subrange.endInclusive) {
-      throw Exception("Invalid subrange $range")
+    if (subrange.isEmpty()) {
+      throw Exception("Empty subrange $range")
     }
   }
 
@@ -77,7 +82,7 @@ open class TwoColoredLinkedRange<BoundType: Comparable<BoundType>, LengthType: C
           defaultColorSubranges.removeAt(index)
         }
 
-        joinedSubrange = joinedSubrange.joinRange(first).joinRange(last)
+        joinedSubrange = joinedSubrange.joinRange(first, rangeFactory).joinRange(last, rangeFactory)
         replacedSubrange = first
       }
 
@@ -87,7 +92,7 @@ open class TwoColoredLinkedRange<BoundType: Comparable<BoundType>, LengthType: C
         }
 
         touchingSubranges.reversed().forEachIndexed { index, it ->
-          joinedSubrange = joinedSubrange.joinRange(it)
+          joinedSubrange = joinedSubrange.joinRange(it, rangeFactory)
           if (index != touchingSubranges.lastIndex || intersectingSubranges.isNotEmpty()) {
             defaultColorSubranges.remove(it)
           }
@@ -106,7 +111,7 @@ open class TwoColoredLinkedRange<BoundType: Comparable<BoundType>, LengthType: C
       if (subrange.containsRange(it)) {
         defaultColorSubranges.remove(it)
       } else {
-        val split = it.splitByRange(subrange, step, math)
+        val split = it.splitByRange(subrange, step, math, rangeFactory)
         val itIndex = defaultColorSubranges.indexOf(it)
         defaultColorSubranges[itIndex] = split.first()
 
@@ -127,7 +132,7 @@ open class TwoColoredLinkedRange<BoundType: Comparable<BoundType>, LengthType: C
   }
 
   override fun getColor(bound: BoundType): ColorType {
-    if (bound < range.start || bound > range.endInclusive) {
+    if (!range.contains(bound)) {
       throw Exception("Bound $bound is out of range bounds $range")
     }
 
@@ -137,7 +142,11 @@ open class TwoColoredLinkedRange<BoundType: Comparable<BoundType>, LengthType: C
     }
   }
 
-  override fun getSubrangeOfColor(color: ColorType, maxLength: LengthType, segmentRange: ClosedRange<BoundType>): ClosedRange<BoundType>? {
+  override fun getSubrangeOfColor(
+    color: ColorType,
+    maxLength: LengthType,
+    segmentRange: ClosedRange<BoundType>,
+  ): ClosedRange<BoundType>? {
     if (maxLength < step) {
       throw Exception("Max length $maxLength can't be lesser than step $step")
     }
@@ -152,10 +161,12 @@ open class TwoColoredLinkedRange<BoundType: Comparable<BoundType>, LengthType: C
 
     if (fullLengthPair != null) {
       val (subrange) = fullLengthPair
-      return subrange.makeTypedRange(subrange.start, math.subtract(math.add(subrange.start, maxLength), step))
+      return rangeFactory.getRange(subrange.start, math.subtract(math.add(subrange.start, maxLength), step))
     }
 
-    val firstMatchingPair = this.subrangesIterator(segmentRange).asSequence().find { (_, subrangeColor) -> subrangeColor == color }
+    val firstMatchingPair = this.subrangesIterator(segmentRange).asSequence().find { (_, subrangeColor) ->
+      subrangeColor == color
+    }
     return firstMatchingPair?.first
   }
 
@@ -168,7 +179,11 @@ open class TwoColoredLinkedRange<BoundType: Comparable<BoundType>, LengthType: C
   }
 }
 
-open class TwoColoredLinkedRangeIterator<BoundType: Comparable<BoundType>, LengthType: Comparable<LengthType>, ColorType: Enum<ColorType>>(
+open class TwoColoredLinkedRangeIterator<
+    BoundType: Comparable<BoundType>,
+    LengthType: Comparable<LengthType>,
+    ColorType: Enum<ColorType>,
+>(
   private val parent: TwoColoredLinkedRange<BoundType, LengthType, ColorType>,
   private val segmentRange: ClosedRange<BoundType> = parent.range,
 ): Iterator<Pair<ClosedRange<BoundType>, ColorType>> {
@@ -176,7 +191,7 @@ open class TwoColoredLinkedRangeIterator<BoundType: Comparable<BoundType>, Lengt
   private var color = parent.getColor(start)
   private var defaultColorSubrangeIndex = parent.defaultColorSubranges.indexOfFirst {
     when (color) {
-      parent.defaultColor -> it.start <= start && it.endInclusive >= start
+      parent.defaultColor -> it.contains(start)
       else -> it.start >= start
     }
   }
@@ -193,10 +208,13 @@ open class TwoColoredLinkedRangeIterator<BoundType: Comparable<BoundType>, Lengt
     var defaultColorSubrange = parent.defaultColorSubranges.getOrNull(defaultColorSubrangeIndex)
     if (defaultColorSubrange != null) {
       if (defaultColorSubrange.start < segmentRange.start) {
-        defaultColorSubrange = defaultColorSubrange.makeTypedRange(maxOf(defaultColorSubrange.start, segmentRange.start), defaultColorSubrange.endInclusive)
+        defaultColorSubrange = parent.rangeFactory.getRange(
+          maxOf(defaultColorSubrange.start, segmentRange.start),
+          defaultColorSubrange.endInclusive,
+        )
       }
       if (defaultColorSubrange.endInclusive > segmentRange.endInclusive) {
-        defaultColorSubrange = defaultColorSubrange.makeTypedRange(
+        defaultColorSubrange = parent.rangeFactory.getRange(
           defaultColorSubrange.start,
           minOf(defaultColorSubrange.endInclusive, segmentRange.endInclusive)
         )
@@ -214,7 +232,7 @@ open class TwoColoredLinkedRangeIterator<BoundType: Comparable<BoundType>, Lengt
         null -> segmentRange.endInclusive
         else -> minOf(parent.math.subtract(defaultColorSubrange.start, parent.step), segmentRange.endInclusive)
       }
-      pair = parent.range.makeTypedRange(start, endInclusive) to color
+      pair = parent.rangeFactory.getRange(start, endInclusive) to color
       color = parent.defaultColor
     }
     start = parent.math.add(pair.first.endInclusive, parent.step)
@@ -227,10 +245,10 @@ open class TwoColoredIntLinkedRange<ColorType: Enum<ColorType>>(
   range: ClosedRange<Int>,
   defaultColor: ColorType,
   otherColor: ColorType,
-): TwoColoredLinkedRange<Int, Int, ColorType>(range, 1, IntBoundMath, defaultColor, otherColor)
+): TwoColoredLinkedRange<Int, Int, ColorType>(range, 1, IntBoundMath, defaultColor, otherColor, IntRangeFactory)
 
 open class TwoColoredLongLinkedRange<ColorType: Enum<ColorType>>(
   range: ClosedRange<Long>,
   defaultColor: ColorType,
   otherColor: ColorType,
-): TwoColoredLinkedRange<Long, Long, ColorType>(range, 1, LongBoundMath, defaultColor, otherColor)
+): TwoColoredLinkedRange<Long, Long, ColorType>(range, 1, LongBoundMath, defaultColor, otherColor, LongRangeFactory)
