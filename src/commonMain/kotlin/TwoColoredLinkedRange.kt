@@ -5,12 +5,12 @@ open class TwoColoredLinkedRange<
     LengthType: Comparable<LengthType>,
     ColorType: Enum<ColorType>,
 >(
-  override val range: ClosedRange<BoundType>,
-  override val step: LengthType,
-  override val math: BoundMath<BoundType, LengthType>,
-  override val defaultColor: ColorType,
-  override val otherColor: ColorType,
-  override val rangeFactory: RangeFactory<BoundType> = ClosedRangeFactory(),
+  final override val range: ClosedRange<BoundType>,
+  final override val step: LengthType,
+  final override val math: BoundMath<BoundType, LengthType>,
+  final override val defaultColor: ColorType,
+  final override val otherColor: ColorType,
+  final override val rangeFactory: RangeFactory<BoundType> = ClosedRangeFactory(),
 ): TwoColoredRange<BoundType, LengthType, ColorType> {
   override val length = math.getLength(range.start, math.add(range.endInclusive, step))
   internal val defaultColorSubranges = mutableListOf(range)

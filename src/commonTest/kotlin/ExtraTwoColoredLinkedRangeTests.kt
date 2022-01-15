@@ -80,7 +80,7 @@ class ExtraTwoColoredLinkedRangeTests {
     val longRange = TwoColoredLongLinkedRange(1L..2L, RedBlackYellowColor.RED, RedBlackYellowColor.BLACK)
     longRange.setSubrangeOtherColor(2L..2L)
     assertContentEquals(listOf(1L..1L), longRange.getSubrangesOfDefaultColor())
-    assertContentEquals(listOf(2L..2L), longRange.getSubrangesOfOtherColor(), )
+    assertContentEquals(listOf(2L..2L), longRange.getSubrangesOfOtherColor())
   }
 
   @Test
