@@ -1,5 +1,5 @@
 plugins {
-    kotlin("multiplatform") version "1.5.10"
+    kotlin("multiplatform") version "1.6.10"
     id("org.jetbrains.dokka") version "1.6.10"
     id("maven-publish")
 }
@@ -43,7 +43,6 @@ kotlin {
         else -> throw GradleException("Host OS is not supported in Kotlin/Native.")
     }
 
-    
     sourceSets {
         val commonMain by getting
         val commonTest by getting {
