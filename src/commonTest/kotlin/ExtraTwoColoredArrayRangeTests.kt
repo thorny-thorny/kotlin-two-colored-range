@@ -5,10 +5,10 @@ import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertFailsWith
 
-enum class RedBlackYellowColor {
+enum class RedGreenBlueColor {
   RED,
-  BLACK,
-  YELLOW,
+  GREEN,
+  BLUE,
 }
 
 object BrokenIntBoundMath1: BoundMath<Int, Int> {
@@ -54,32 +54,32 @@ object WeirdMath: BoundMath<WeirdBound, Int> {
 }
 
 class ExtraTwoColoredArrayRangeTests {
-  private fun rangeWithMath(math: BoundMath<Int, Int>): TwoColoredArrayRange<Int, Int, RedBlackYellowColor> {
-    return TwoColoredArrayRange(1..2, 1, math, RedBlackYellowColor.RED, RedBlackYellowColor.BLACK)
+  private fun rangeWithMath(math: BoundMath<Int, Int>): TwoColoredArrayRange<Int, Int, RedGreenBlueColor> {
+    return TwoColoredArrayRange(1..2, 1, math, RedGreenBlueColor.RED, RedGreenBlueColor.GREEN)
   }
 
   @Test
   fun testExtraExceptions() {
     val range = rangeWithMath(IntBoundMath)
-    assertFailsWith<Exception> { range.getSubrangesOfColor(RedBlackYellowColor.YELLOW) }
-    assertFailsWith<Exception> { range.setSubrangeColor(1..2, RedBlackYellowColor.YELLOW) }
-    assertFailsWith<Exception> { range.getSubrangeOfColor(RedBlackYellowColor.YELLOW) }
+    assertFailsWith<Exception> { range.getSubrangesOfColor(RedGreenBlueColor.BLUE) }
+    assertFailsWith<Exception> { range.setSubrangeColor(1..2, RedGreenBlueColor.BLUE) }
+    assertFailsWith<Exception> { range.getSubrangeOfColor(RedGreenBlueColor.BLUE) }
     assertFailsWith<Exception> { rangeWithMath(BrokenIntBoundMath1) }
     assertFailsWith<Exception> { rangeWithMath(BrokenIntBoundMath2) }
     assertFailsWith<Exception> { rangeWithMath(BrokenIntBoundMath3) }
     assertFailsWith<Exception> {
-      TwoColoredArrayRange(1..2, 1, IntBoundMath, RedBlackYellowColor.RED, RedBlackYellowColor.RED)
+      TwoColoredArrayRange(1..2, 1, IntBoundMath, RedGreenBlueColor.RED, RedGreenBlueColor.RED)
     }
   }
 
   @Test
   fun testDerivatives() {
-    val intRange = TwoColoredIntArrayRange(1..2, RedBlackYellowColor.RED, RedBlackYellowColor.BLACK)
+    val intRange = TwoColoredIntArrayRange(1..2, RedGreenBlueColor.RED, RedGreenBlueColor.GREEN)
     intRange.setSubrangeOtherColor(2..2)
     assertContentEquals(listOf(1..1), intRange.getSubrangesOfDefaultColor())
     assertContentEquals(listOf(2..2), intRange.getSubrangesOfOtherColor())
 
-    val longRange = TwoColoredLongArrayRange(1L..2L, RedBlackYellowColor.RED, RedBlackYellowColor.BLACK)
+    val longRange = TwoColoredLongArrayRange(1L..2L, RedGreenBlueColor.RED, RedGreenBlueColor.GREEN)
     longRange.setSubrangeOtherColor(2L..2L)
     assertContentEquals(listOf(1L..1L), longRange.getSubrangesOfDefaultColor())
     assertContentEquals(listOf(2L..2L), longRange.getSubrangesOfOtherColor())
@@ -91,8 +91,8 @@ class ExtraTwoColoredArrayRangeTests {
       WeirdBound(1)..WeirdBound(2),
       1,
       WeirdMath,
-      RedBlackYellowColor.RED,
-      RedBlackYellowColor.BLACK,
+      RedGreenBlueColor.RED,
+      RedGreenBlueColor.GREEN,
     )
 
     // Just to cover non-standard ranges related code
