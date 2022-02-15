@@ -1,6 +1,7 @@
 plugins {
     kotlin("multiplatform") version "1.6.10"
     id("org.jetbrains.dokka") version "1.6.10"
+    id("org.jetbrains.kotlinx.kover") version "0.5.0"
     id("maven-publish")
 }
 
@@ -62,4 +63,8 @@ kotlin {
             val nativeTest by getting
         }
     }
+}
+
+kover {
+    coverageEngine.set(kotlinx.kover.api.CoverageEngine.JACOCO)
 }
