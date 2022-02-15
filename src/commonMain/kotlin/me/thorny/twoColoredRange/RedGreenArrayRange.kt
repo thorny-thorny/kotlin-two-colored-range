@@ -23,13 +23,13 @@ open class RedGreenArrayRange<BoundType: Comparable<BoundType>, LengthType: Comp
   range: ClosedRange<BoundType>,
   step: LengthType,
   math: BoundMath<BoundType, LengthType>,
-  defaultColor: RedGreenColor? = RedGreenColor.RED,
+  defaultColor: RedGreenColor = RedGreenColor.RED,
   rangeFactory: RangeFactory<BoundType> = ClosedRangeFactory(),
 ): TwoColoredArrayRange<BoundType, LengthType, RedGreenColor>(
   range,
   step,
   math,
-  defaultColor ?: RedGreenColor.RED,
+  defaultColor,
   if (defaultColor == RedGreenColor.GREEN) RedGreenColor.RED else RedGreenColor.GREEN,
   rangeFactory,
 ) {
@@ -71,7 +71,7 @@ open class RedGreenArrayRange<BoundType: Comparable<BoundType>, LengthType: Comp
  */
 open class RedGreenIntArrayRange(
   range: ClosedRange<Int>,
-  defaultColor: RedGreenColor? = RedGreenColor.RED,
+  defaultColor: RedGreenColor = RedGreenColor.RED,
 ): RedGreenArrayRange<Int, Int>(
   range,
   1,
@@ -85,7 +85,7 @@ open class RedGreenIntArrayRange(
  */
 open class RedGreenLongArrayRange(
   range: ClosedRange<Long>,
-  defaultColor: RedGreenColor? = RedGreenColor.RED,
+  defaultColor: RedGreenColor = RedGreenColor.RED,
 ): RedGreenArrayRange<Long, Long>(
   range,
   1,

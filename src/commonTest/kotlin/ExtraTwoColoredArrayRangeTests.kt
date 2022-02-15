@@ -1,6 +1,8 @@
-import me.thorny.twoColoredRange.*
 import me.thorny.twoColoredRange.math.BoundMath
 import me.thorny.twoColoredRange.math.IntBoundMath
+import me.thorny.twoColoredRange.TwoColoredArrayRange
+import me.thorny.twoColoredRange.TwoColoredIntArrayRange
+import me.thorny.twoColoredRange.TwoColoredLongArrayRange
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertFailsWith

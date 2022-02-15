@@ -1,9 +1,11 @@
+import me.thorny.twoColoredRange.RedGreenArrayRange
 import me.thorny.twoColoredRange.RedGreenColor
 import me.thorny.twoColoredRange.RedGreenIntArrayRange
 import me.thorny.twoColoredRange.RedGreenLongArrayRange
-import kotlin.test.Test
-import kotlin.test.assertContentEquals
-import kotlin.test.assertEquals
+import me.thorny.twoColoredRange.math.IntBoundMath
+import me.thorny.twoColoredRange.rangeUtils.ClosedRangeFactory
+import me.thorny.twoColoredRange.rangeUtils.IntRangeFactory
+import kotlin.test.*
 
 class ExtraRedGreenArrayRangeTests {
   @Test
@@ -34,5 +36,12 @@ class ExtraRedGreenArrayRangeTests {
     assertEquals(1..1, range.getGreenSubrange())
     range.setSubrangeRed(1..5)
     assertEquals(1..1, range.getRedSubrange())
+  }
+
+  @Test
+  fun testDefaultConstructorArguments() {
+    val range = RedGreenArrayRange(1..3, 1, IntBoundMath)
+    assertEquals(RedGreenColor.RED, range.defaultColor)
+    assertIs<ClosedRangeFactory<Int>>(range.rangeFactory)
   }
 }

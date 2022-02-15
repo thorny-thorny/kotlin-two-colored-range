@@ -65,6 +65,16 @@ internal class RedGreenIntArrayRangeTests {
 
     assertFailsWith<Exception> { range.getColor(0) }
     assertFailsWith<Exception> { range.getColor(3) }
+
+    eachColor { color, otherColor ->
+      val anotherRange = RedGreenIntArrayRange(1..3)
+      anotherRange.setSubrangeColor(1..3, color)
+      anotherRange.setSubrangeColor(1..1, otherColor)
+      anotherRange.setSubrangeColor(3..3, otherColor)
+
+      assertEquals(color, anotherRange.getColor(2))
+      assertEquals(otherColor, anotherRange.getColor(3))
+    }
   }
 
   @Test
@@ -290,6 +300,12 @@ internal class RedGreenIntArrayRangeTests {
           4..4 to otherColor,
         ),
         range.subrangesIterator(2..4).asSequence().toList(),
+      )
+      assertContentEquals(
+        listOf(
+          4..5 to otherColor,
+        ),
+        range.subrangesIterator(4..5).asSequence().toList(),
       )
 
       range = rangeOfColor(1..5, color)
