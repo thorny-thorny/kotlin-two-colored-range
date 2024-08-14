@@ -1,9 +1,7 @@
 package me.thorny.twoColoredRange.math
 
-import me.thorny.twoColoredRange.TwoColoredRange
-
 /**
- * Math used by colored ranges. See [TwoColoredRange] for details.
+ * Math used by colored ranges. See [TwoColoredRange][me.thorny.twoColoredRange.TwoColoredRange] for details.
  */
 interface BoundMath<BoundType: Comparable<BoundType>, LengthType: Comparable<LengthType>> {
   /**
@@ -23,7 +21,7 @@ interface BoundMath<BoundType: Comparable<BoundType>, LengthType: Comparable<Len
 }
 
 /**
- * Math for colored Int ranges.
+ * Math for colored [Int] ranges.
  */
 object IntBoundMath: BoundMath<Int, Int> {
   override fun add(bound: Int, length: Int) = bound + length
@@ -32,7 +30,7 @@ object IntBoundMath: BoundMath<Int, Int> {
 }
 
 /**
- * Math for colored Long ranges.
+ * Math for colored [Long] ranges.
  */
 object LongBoundMath: BoundMath<Long, Long> {
   override fun add(bound: Long, length: Long) = bound + length

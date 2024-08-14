@@ -1,3 +1,5 @@
+import org.jetbrains.dokka.gradle.DokkaTask
+
 plugins {
     kotlin("multiplatform") version "1.6.10"
     id("org.jetbrains.dokka") version "1.6.10"
@@ -27,11 +29,20 @@ kotlin {
                 )
             }
         }
+        dependencies {
+            // For some reason sources from commonMain refer to stdlib 1.4.31 without this line breaking Java tests
+            commonMainApi("org.jetbrains.kotlin:kotlin-stdlib:1.6.10")
+        }
     }
     js(BOTH) {
         browser {
             commonWebpackConfig {
                 cssSupport.enabled = true
+            }
+            testTask {
+                useKarma {
+                    useSafari()
+                }
             }
         }
     }

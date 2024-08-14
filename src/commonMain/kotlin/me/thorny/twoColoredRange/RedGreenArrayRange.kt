@@ -7,71 +7,74 @@ import me.thorny.twoColoredRange.rangeUtils.ClosedRangeFactory
 import me.thorny.twoColoredRange.rangeUtils.IntRangeFactory
 import me.thorny.twoColoredRange.rangeUtils.LongRangeFactory
 import me.thorny.twoColoredRange.rangeUtils.RangeFactory
+import kotlin.jvm.JvmOverloads
 
 /**
  * Color type for [RedGreenArrayRange].
  */
 enum class RedGreenColor {
-  RED,
-  GREEN,
+  Red,
+  Green,
 }
 
 /**
- * Subclass of [TwoColoredArrayRange] using [RedGreenColor] and [RedGreenColor.RED] as default color by default.
+ * Subclass of [TwoColoredArrayRange] using [RedGreenColor] and [RedGreenColor.Red] as default color by default.
  */
-open class RedGreenArrayRange<BoundType: Comparable<BoundType>, LengthType: Comparable<LengthType>>(
+open class RedGreenArrayRange<BoundType: Comparable<BoundType>, LengthType: Comparable<LengthType>> @JvmOverloads constructor(
   range: ClosedRange<BoundType>,
   step: LengthType,
   math: BoundMath<BoundType, LengthType>,
-  defaultColor: RedGreenColor = RedGreenColor.RED,
+  defaultColor: RedGreenColor = RedGreenColor.Red,
   rangeFactory: RangeFactory<BoundType> = ClosedRangeFactory(),
 ): TwoColoredArrayRange<BoundType, LengthType, RedGreenColor>(
   range,
   step,
   math,
   defaultColor,
-  if (defaultColor == RedGreenColor.GREEN) RedGreenColor.RED else RedGreenColor.GREEN,
+  if (defaultColor == RedGreenColor.Green) RedGreenColor.Red else RedGreenColor.Green,
   rangeFactory,
 ) {
   /**
-   * Returns subranges of [RedGreenColor.RED] color.
+   * Returns subranges of [RedGreenColor.Red] color.
    */
-  fun getRedSubranges() = getSubrangesOfColor(RedGreenColor.RED)
+  fun getRedSubranges() = getSubrangesOfColor(RedGreenColor.Red)
 
   /**
-   * Returns subranges of [RedGreenColor.GREEN] color.
+   * Returns subranges of [RedGreenColor.Green] color.
    */
-  fun getGreenSubranges() = getSubrangesOfColor(RedGreenColor.GREEN)
+  fun getGreenSubranges() = getSubrangesOfColor(RedGreenColor.Green)
 
   /**
-   * Paints [subrange] with [RedGreenColor.RED] color.
+   * Paints [subrange] with [RedGreenColor.Red] color.
    */
-  fun setSubrangeRed(subrange: ClosedRange<BoundType>) = setSubrangeColor(subrange, RedGreenColor.RED)
+  fun setSubrangeRed(subrange: ClosedRange<BoundType>) = setSubrangeColor(subrange, RedGreenColor.Red)
 
   /**
-   * Paints [subrange] with [RedGreenColor.GREEN] color.
+   * Paints [subrange] with [RedGreenColor.Green] color.
    */
-  fun setSubrangeGreen(subrange: ClosedRange<BoundType>) = setSubrangeColor(subrange, RedGreenColor.GREEN)
+  fun setSubrangeGreen(subrange: ClosedRange<BoundType>) = setSubrangeColor(subrange, RedGreenColor.Green)
 
   /**
-   * Requests subrange of [RedGreenColor.RED], see [TwoColoredRange.getSubrangeOfColor] for details.
+   * Requests subrange of [RedGreenColor.Red] color, see [TwoColoredRange.getSubrangeOfColor] for details.
    */
+  @JvmOverloads
   fun getRedSubrange(maxLength: LengthType = step, limitByRange: ClosedRange<BoundType> = range) =
-    getSubrangeOfColor(RedGreenColor.RED, maxLength, limitByRange)
+    getSubrangeOfColor(RedGreenColor.Red, maxLength, limitByRange)
 
   /**
-   * Requests subrange of [RedGreenColor.GREEN], see [TwoColoredRange.getSubrangeOfColor] for details.
+   * Requests subrange of [RedGreenColor.Green] color, see [TwoColoredRange.getSubrangeOfColor] for details.
    */
+  @JvmOverloads
   fun getGreenSubrange(maxLength: LengthType = step, limitByRange: ClosedRange<BoundType> = range) =
-    getSubrangeOfColor(RedGreenColor.GREEN, maxLength, limitByRange)
+    getSubrangeOfColor(RedGreenColor.Green, maxLength, limitByRange)
 }
 
 /**
  * [RedGreenArrayRange] subclass for [IntRange].
  */
-open class RedGreenIntArrayRange(
+open class RedGreenIntArrayRange @JvmOverloads constructor(
   range: ClosedRange<Int>,
-  defaultColor: RedGreenColor = RedGreenColor.RED,
+  defaultColor: RedGreenColor = RedGreenColor.Red,
 ): RedGreenArrayRange<Int, Int>(
   range,
   1,
@@ -83,9 +86,9 @@ open class RedGreenIntArrayRange(
 /**
  * [RedGreenArrayRange] subclass for [LongRange].
  */
-open class RedGreenLongArrayRange(
+open class RedGreenLongArrayRange @JvmOverloads constructor(
   range: ClosedRange<Long>,
-  defaultColor: RedGreenColor = RedGreenColor.RED,
+  defaultColor: RedGreenColor = RedGreenColor.Red,
 ): RedGreenArrayRange<Long, Long>(
   range,
   1,

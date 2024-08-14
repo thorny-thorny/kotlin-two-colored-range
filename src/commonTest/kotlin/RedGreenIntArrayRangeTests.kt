@@ -5,8 +5,8 @@ import kotlin.test.*
 
 internal class RedGreenIntArrayRangeTests {
   private fun eachColor(action: (color: RedGreenColor, otherColor: RedGreenColor) -> Unit) {
-    action(RedGreenColor.RED, RedGreenColor.GREEN)
-    action(RedGreenColor.GREEN, RedGreenColor.RED)
+    action(RedGreenColor.Red, RedGreenColor.Green)
+    action(RedGreenColor.Green, RedGreenColor.Red)
   }
 
   private fun rangeOfColor(range: IntRange, color: RedGreenColor): RedGreenIntArrayRange {
@@ -19,7 +19,7 @@ internal class RedGreenIntArrayRangeTests {
   fun testConstructorExceptions() {
     expect<Unit>(Unit) { RedGreenIntArrayRange(1..6) }
     expect<Unit>(Unit) { RedGreenIntArrayRange(1..1) }
-    assertFailsWith<Exception> { RedGreenIntArrayRange(IntRange(1, 0)) }
+    assertFailsWith<IllegalArgumentException> { RedGreenIntArrayRange(IntRange(1, 0)) }
   }
 
   @Test
@@ -28,8 +28,8 @@ internal class RedGreenIntArrayRangeTests {
     assertEquals(1..2, range.range)
     assertEquals(1, range.step)
     assertEquals(IntBoundMath, range.math)
-    assertEquals(RedGreenColor.RED, range.defaultColor)
-    assertEquals(RedGreenColor.GREEN, range.otherColor)
+    assertEquals(RedGreenColor.Red, range.defaultColor)
+    assertEquals(RedGreenColor.Green, range.otherColor)
     assertEquals(2, range.length)
   }
 
@@ -48,23 +48,23 @@ internal class RedGreenIntArrayRangeTests {
     val range = RedGreenIntArrayRange(1..2)
 
     range.setSubrangeDefaultColor(1..2)
-    assertContentEquals(listOf(1..2), range.getSubrangesOfColor(RedGreenColor.RED))
-    assertContentEquals(emptyList(), range.getSubrangesOfColor(RedGreenColor.GREEN))
+    assertContentEquals(listOf(1..2), range.getSubrangesOfColor(RedGreenColor.Red))
+    assertContentEquals(emptyList(), range.getSubrangesOfColor(RedGreenColor.Green))
     assertContentEquals(listOf(1..2), range.getSubrangesOfDefaultColor())
     assertContentEquals(emptyList(), range.getSubrangesOfOtherColor())
-    assertEquals(RedGreenColor.RED, range.getColor(1))
-    assertEquals(RedGreenColor.RED, range.getColor(2))
+    assertEquals(RedGreenColor.Red, range.getColor(1))
+    assertEquals(RedGreenColor.Red, range.getColor(2))
 
     range.setSubrangeOtherColor(1..2)
-    assertContentEquals(emptyList(), range.getSubrangesOfColor(RedGreenColor.RED))
-    assertContentEquals(listOf(1..2), range.getSubrangesOfColor(RedGreenColor.GREEN))
+    assertContentEquals(emptyList(), range.getSubrangesOfColor(RedGreenColor.Red))
+    assertContentEquals(listOf(1..2), range.getSubrangesOfColor(RedGreenColor.Green))
     assertContentEquals(emptyList(), range.getSubrangesOfDefaultColor())
     assertContentEquals(listOf(1..2), range.getSubrangesOfOtherColor())
-    assertEquals(RedGreenColor.GREEN, range.getColor(1))
-    assertEquals(RedGreenColor.GREEN, range.getColor(2))
+    assertEquals(RedGreenColor.Green, range.getColor(1))
+    assertEquals(RedGreenColor.Green, range.getColor(2))
 
-    assertFailsWith<Exception> { range.getColor(0) }
-    assertFailsWith<Exception> { range.getColor(3) }
+    assertFailsWith<IllegalArgumentException> { range.getColor(0) }
+    assertFailsWith<IllegalArgumentException> { range.getColor(3) }
 
     eachColor { color, otherColor ->
       val anotherRange = RedGreenIntArrayRange(1..3)
@@ -81,10 +81,10 @@ internal class RedGreenIntArrayRangeTests {
   fun testSubrangesExceptions() {
     eachColor { color, _ ->
       expect(Unit) { RedGreenIntArrayRange(1..3).setSubrangeColor(1..3, color) }
-      assertFailsWith<Exception> { RedGreenIntArrayRange(1..3).setSubrangeColor(0..3, color) }
-      assertFailsWith<Exception> { RedGreenIntArrayRange(1..3).setSubrangeColor(1..4, color) }
-      assertFailsWith<Exception> { RedGreenIntArrayRange(1..3).setSubrangeColor(0..4, color) }
-      assertFailsWith<Exception> { RedGreenIntArrayRange(1..3).setSubrangeColor(IntRange(3, 1), color) }
+      assertFailsWith<IllegalArgumentException> { RedGreenIntArrayRange(1..3).setSubrangeColor(0..3, color) }
+      assertFailsWith<IllegalArgumentException> { RedGreenIntArrayRange(1..3).setSubrangeColor(1..4, color) }
+      assertFailsWith<IllegalArgumentException> { RedGreenIntArrayRange(1..3).setSubrangeColor(0..4, color) }
+      assertFailsWith<IllegalArgumentException> { RedGreenIntArrayRange(1..3).setSubrangeColor(IntRange(3, 1), color) }
     }
   }
 
@@ -96,11 +96,11 @@ internal class RedGreenIntArrayRangeTests {
       range.setSubrangeColor(6..6, color)
       assertContentEquals(listOf(6..6), range.getSubrangesOfColor(color))
       assertContentEquals(listOf(1..5, 7..11), range.getSubrangesOfColor(otherColor))
-      // Add far range on left - should be added before existing subrange
+      // Add range on far left - should be added before existing subrange
       range.setSubrangeColor(1..1, color)
       assertContentEquals(listOf(1..1, 6..6), range.getSubrangesOfColor(color))
       assertContentEquals(listOf(2..5, 7..11), range.getSubrangesOfColor(otherColor))
-      // Add far range on right - should be added after existing subrange
+      // Add range on far right - should be added after existing subrange
       range.setSubrangeColor(11..11, color)
       assertContentEquals(listOf(1..1, 6..6, 11..11), range.getSubrangesOfColor(color))
       assertContentEquals(listOf(2..5, 7..10), range.getSubrangesOfColor(otherColor))
@@ -287,14 +287,6 @@ internal class RedGreenIntArrayRangeTests {
       range.setSubrangeColor(4..5, otherColor)
       assertContentEquals(
         listOf(
-          1..2 to otherColor,
-          3..3 to color,
-          4..5 to otherColor,
-        ),
-        range.subrangesIterator().asSequence().toList(),
-      )
-      assertContentEquals(
-        listOf(
           2..2 to otherColor,
           3..3 to color,
           4..4 to otherColor,
@@ -312,19 +304,17 @@ internal class RedGreenIntArrayRangeTests {
       range.setSubrangeColor(3..3, otherColor)
       assertContentEquals(
         listOf(
-          1..2 to color,
-          3..3 to otherColor,
-          4..5 to color,
-        ),
-        range.subrangesIterator().asSequence().toList(),
-      )
-      assertContentEquals(
-        listOf(
           2..2 to color,
           3..3 to otherColor,
           4..4 to color,
         ),
         range.subrangesIterator(2..4).asSequence().toList(),
+      )
+      assertContentEquals(
+        listOf(
+          4..4 to color,
+        ),
+        range.subrangesIterator(4..4).asSequence().toList(),
       )
     }
   }
@@ -332,12 +322,12 @@ internal class RedGreenIntArrayRangeTests {
   @Test
   fun testSubrangeRequestsExceptions() {
     expect<Unit>(Unit) { RedGreenIntArrayRange(1..2).subrangesIterator(IntRange(2, 2)) }
-    expect<Unit>(Unit) { RedGreenIntArrayRange(1..2).getSubrangeOfColor(RedGreenColor.RED, limitByRange = IntRange(2, 2)) }
-    assertFailsWith<Exception> { RedGreenIntArrayRange(1..2).subrangesIterator(IntRange(2, 1)) }
-    assertFailsWith<Exception> { RedGreenIntArrayRange(1..2).getSubrangeOfColor(RedGreenColor.RED, limitByRange = IntRange(2, 1)) }
-    assertFailsWith<Exception> { RedGreenIntArrayRange(1..2).subrangesIterator(0..3) }
-    assertFailsWith<Exception> { RedGreenIntArrayRange(1..2).getSubrangeOfColor(RedGreenColor.RED, limitByRange = IntRange(0, 3)) }
-    assertFailsWith<Exception> { RedGreenIntArrayRange(1..2).getSubrangeOfColor(RedGreenColor.RED, 0) }
-    assertFailsWith<Exception> { RedGreenIntArrayRange(1..2).getSubrangeOfColor(RedGreenColor.RED, -1) }
+    expect<Unit>(Unit) { RedGreenIntArrayRange(1..2).getSubrangeOfColor(RedGreenColor.Red, limitByRange = IntRange(2, 2)) }
+    assertFailsWith<IllegalArgumentException> { RedGreenIntArrayRange(1..2).subrangesIterator(IntRange(2, 1)) }
+    assertFailsWith<IllegalArgumentException> { RedGreenIntArrayRange(1..2).getSubrangeOfColor(RedGreenColor.Red, limitByRange = IntRange(2, 1)) }
+    assertFailsWith<IllegalArgumentException> { RedGreenIntArrayRange(1..2).subrangesIterator(0..3) }
+    assertFailsWith<IllegalArgumentException> { RedGreenIntArrayRange(1..2).getSubrangeOfColor(RedGreenColor.Red, limitByRange = IntRange(0, 3)) }
+    assertFailsWith<IllegalArgumentException> { RedGreenIntArrayRange(1..2).getSubrangeOfColor(RedGreenColor.Red, 0) }
+    assertFailsWith<IllegalArgumentException> { RedGreenIntArrayRange(1..2).getSubrangeOfColor(RedGreenColor.Red, -1) }
   }
 }
