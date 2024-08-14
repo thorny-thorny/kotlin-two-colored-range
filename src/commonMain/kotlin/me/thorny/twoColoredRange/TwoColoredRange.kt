@@ -94,14 +94,14 @@ interface TwoColoredRange<
   ): ClosedRange<BoundType>?
 
   /**
-   * [getSubrangeOfColor] called with maxLength = [TwoColoredRange.step] and limitByRange = [TwoColoredRange.range].
+   * [getSubrangeOfColor] called with maxLength = [step][TwoColoredRange.step] and limitByRange = [range].
    *
    * @param color the color.
    */
   fun getSubrangeOfColor(color: ColorType): ClosedRange<BoundType>?
 
   /**
-   * [getSubrangeOfColor] called with limitByRange = [TwoColoredRange.range].
+   * [getSubrangeOfColor] called with limitByRange = [range].
    *
    * @param color the color.
    * @param maxLength maximum length.
@@ -109,7 +109,7 @@ interface TwoColoredRange<
   fun getSubrangeOfColor(color: ColorType, maxLength: LengthType): ClosedRange<BoundType>?
 
   /**
-   * [getSubrangeOfColor] called with maxLength = [TwoColoredRange.step].
+   * [getSubrangeOfColor] called with maxLength = [step][TwoColoredRange.step].
    *
    * @param color the color.
    * @param limitByRange: ClosedRange<BoundType>,
