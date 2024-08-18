@@ -1,10 +1,13 @@
-import org.jetbrains.dokka.gradle.DokkaTask
+import com.vanniktech.maven.publish.JavadocJar
+import com.vanniktech.maven.publish.KotlinMultiplatform
+import com.vanniktech.maven.publish.SonatypeHost
 
 plugins {
-    kotlin("multiplatform") version "1.6.10"
-    id("org.jetbrains.dokka") version "1.6.10"
-    id("org.jetbrains.kotlinx.kover") version "0.5.0"
+    kotlin("multiplatform") version "1.9.20"
+    id("org.jetbrains.dokka") version "1.9.20"
+    id("org.jetbrains.kotlinx.kover") version "0.8.3"
     id("maven-publish")
+    id("com.vanniktech.maven.publish") version "0.29.0"
 }
 
 group = "me.thorny"
@@ -20,6 +23,8 @@ kotlin {
             kotlinOptions.jvmTarget = "1.8"
         }
         withJava()
+        java.sourceCompatibility = JavaVersion.VERSION_1_8
+        java.targetCompatibility = JavaVersion.VERSION_1_8
         testRuns["test"].executionTask.configure {
             testLogging {
                 events(
@@ -30,29 +35,17 @@ kotlin {
             }
         }
     }
-    js(BOTH) {
+    js {
         browser {
-            commonWebpackConfig {
-                cssSupport.enabled = true
-            }
             testTask {
                 useKarma {
                     useSafari()
                 }
             }
         }
+        nodejs()
     }
-    val hostOs = System.getProperty("os.name")
-    val arch = System.getProperty("os.arch")
-    val isMingwX64 = hostOs.startsWith("Windows")
-    val isLinux = hostOs == "Linux"
-    val nativeTarget = when {
-        isLinux && arch == "aarch64" -> null
-        isLinux -> linuxX64("native")
-        isMingwX64 -> mingwX64("native")
-        hostOs == "Mac OS X" -> macosX64("native")
-        else -> throw GradleException("Host OS is not supported in Kotlin/Native.")
-    }
+    macosX64()
 
     sourceSets {
         val commonMain by getting
@@ -61,17 +54,48 @@ kotlin {
                 implementation(kotlin("test"))
             }
         }
-        val jvmMain by getting
         val jvmTest by getting
-        val jsMain by getting
-        val jsTest by getting
-        if (nativeTarget != null) {
-            val nativeMain by getting
-            val nativeTest by getting
+    }
+}
+
+mavenPublishing {
+    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+    signAllPublications()
+    coordinates(project.group as String, "two-colored-range", project.version as String)
+
+    configure(KotlinMultiplatform(
+        javadocJar = JavadocJar.Dokka("dokkaHtml"),
+        sourcesJar = true,
+    ))
+
+    pom {
+        name.set("Two colored range")
+        description.set("Two colored range data structure")
+        inceptionYear.set("2021")
+        url.set("https://github.com/thorny-thorny/two-colored-range")
+        licenses {
+            license {
+                name.set("MIT")
+                url.set("https://opensource.org/license/MIT")
+                distribution.set("https://opensource.org/license/MIT")
+            }
+        }
+        developers {
+            developer {
+                id.set("thorny")
+                name.set("Thorny")
+                url.set("https://thorny.me")
+                email.set("thorny.develops@gmail.com")
+            }
+        }
+        scm {
+            url.set("https://github.com/thorny-thorny/two-colored-range")
+            connection.set("scm:git:git://github.com/thorny-thorny/two-colored-range.git")
+            developerConnection.set("scm:git:ssh://git@github.com/thorny-thorny/two-colored-range.git")
         }
     }
 }
 
 kover {
-    coverageEngine.set(kotlinx.kover.api.CoverageEngine.JACOCO)
+    useJacoco()
 }
