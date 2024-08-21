@@ -45,7 +45,9 @@ kotlin {
         }
         nodejs()
     }
-    macosX64()
+    if (System.getProperty("os.name") == "Mac OS X") {
+        macosX64()
+    }
 
     sourceSets {
         val commonMain by getting
