@@ -2,7 +2,7 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/me.thorny/two-colored-range)](https://mvnrepository.com/artifact/me.thorny)
 
-![Two-colored range visualisation example](visualisation-example.png)
+![Two-colored range visualisation example](visualization-example.png)
 
 Two-colored range is data structure that efficiently stores and modifies data of a range where each point is colored in one of two possible colors. This project contains mutable and immutable two-colored range interfaces and an implementation based on ArrayList.
 
